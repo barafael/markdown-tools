@@ -255,20 +255,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef53942eb7bf7ff43a617b3e2c1c4a5ecf5944a7c1bc12d7ee39bbb15e5c1519"
 
 [[package]]
-name = "markdown-snippet-inserter"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "pulldown-cmark",
- "pulldown-cmark-to-cmark",
- "serde",
- "serde_derive",
- "serde_json",
- "walkdir",
-]
-
-[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -335,9 +321,9 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.9.3"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77a1a2f1f0a7ecff9c31abbe177637be0e97a0aef46cf8738ece09327985d998"
+checksum = "2d9cc634bc78768157b5cbfe988ffcd1dcba95cd2b2f03a88316c08c6d00ed63"
 dependencies = [
  "bitflags",
  "getopts",
@@ -439,6 +425,8 @@ dependencies = [
  "clap",
  "pest",
  "pest_derive",
+ "pulldown-cmark",
+ "pulldown-cmark-to-cmark",
  "serde",
  "serde_derive",
  "serde_json",

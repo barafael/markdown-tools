@@ -1,0 +1,86 @@
+use pulldown_cmark::{Event, Parser, Tag};
+use pulldown_cmark_to_cmark::cmark;
+use std::{
+    fs,
+    io::Write,
+    process::{Command, Stdio},
+};
+
+fn main() -> anyhow::Result<()> {
+    // Read the Markdown file from disk
+    let input = fs::read_to_string("example.md").unwrap();
+
+    // Parse the Markdown input into events
+    let parser = Parser::new(&input);
+
+    // Iterate over the events and process code blocks
+    let mut in_code_block = false;
+
+    let mut i = parser.map(|event| match event {
+        Event::Start(Tag::CodeBlock(ref kind)) => {
+            dbg!(kind);
+            in_code_block = true;
+            event
+        }
+        Event::Text(text) if in_code_block => {
+            let formatted_code = format_rust_code_block(&text);
+            Event::Text(formatted_code.into())
+        }
+        Event::End(Tag::CodeBlock(_)) => {
+            in_code_block = false;
+            event
+        }
+        _ => event,
+    });
+
+    let mut buf = String::with_capacity(input.len() + 1000);
+    let state = cmark(&mut i, &mut buf)?;
+    dbg!(state);
+
+    let mut stdout = std::io::stdout();
+
+    stdout.write_all(buf.as_bytes())?;
+    Ok(())
+}
+
+/*
+fn format_rust_code_block_crate(code: &str) -> String {
+    // Set up Rustfmt configuration with default options
+    let mut config = Config::default();
+    config.set().emit_mode(EmitMode::Stdout);
+
+    // Run Rustfmt on the code block
+    let input = Input::Text(code.to_owned());
+    let mut output = Vec::new();
+    if let Err(e) = rustfmt::format_input(input, &config, Some(&mut output)) {
+        eprintln!("Failed to format Rust code: {:?}", e);
+        return code.to_owned();
+    }
+
+    // Return the formatted code as a String
+    String::from_utf8_lossy(&output).into_owned()
+}
+*/
+
+fn format_rust_code_block(code: &str) -> String {
+    // Run the rustfmt command line tool on the code block
+    let output = Command::new("rustfmt")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .arg("--edition=2021")
+        .spawn()
+        .and_then(|mut child| {
+            child.stdin.as_mut().unwrap().write_all(code.as_bytes())?;
+            let output = child.wait_with_output()?;
+            Ok(output.stdout)
+        });
+
+    // Return the formatted code as a String, or the original code block if there was an error
+    match output {
+        Ok(formatted_output) => String::from_utf8_lossy(&formatted_output).into_owned(),
+        Err(e) => {
+            eprintln!("Failed to format Rust code: {e:?}");
+            code.to_owned()
+        }
+    }
+}

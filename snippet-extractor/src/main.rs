@@ -21,7 +21,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
             let pairs = SnippetParser::parse(Rule::file, &content)?;
             for pair in pairs.into_iter().next().unwrap().into_inner() {
                 if pair.as_rule() == Rule::snippet {
-                    let mut snippet = pair.into_inner().into_iter();
+                    let mut snippet = pair.into_inner();
                     let identifier = snippet.next().unwrap().as_str().to_string();
                     let snippet_text = snippet.next().unwrap().as_str().to_string();
                     map.insert(identifier, snippet_text);
