@@ -1,2 +1,3 @@
-# markdown-rust-snippet-formatter
-Run rustfmt on snippets of Rust
+# snippet extractor
+
+Extract marked snippets from text files, for example to insert them in markdown-based presentations
