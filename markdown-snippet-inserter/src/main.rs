@@ -35,11 +35,11 @@ fn main() -> anyhow::Result<()> {
                     .filter(|s| s.starts_with("marker:"))
                     .collect::<Vec<_>>()
                     .pop();
-                dbg!(&marker);
                 if let Some(marker) = marker {
                     let marker = marker.split_once(':').unwrap().1;
                     if let Some(value) = snippets.get(marker) {
-                        current_snippet = Some(value);
+                        let dedented = textwrap::dedent(value);
+                        current_snippet = Some(dedented);
                     }
                 }
             }
@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
         }
         Event::Text(text) if in_code_block => {
             if let Some(value) = current_snippet.take() {
-                Event::Text(pulldown_cmark::CowStr::Borrowed(value))
+                Event::Text(pulldown_cmark::CowStr::Boxed(value.into()))
             } else {
                 Event::Text(text)
             }
@@ -61,8 +61,7 @@ fn main() -> anyhow::Result<()> {
     });
 
     let mut buf = String::with_capacity(input.len() + 1000);
-    let state = cmark(&mut i, &mut buf)?;
-    dbg!(state);
+    let _state = cmark(&mut i, &mut buf)?;
 
     let mut stdout = std::io::stdout();
 
