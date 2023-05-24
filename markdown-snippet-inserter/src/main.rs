@@ -1,30 +1,57 @@
-use pulldown_cmark::{Event, Parser, Tag};
+use clap::Parser as ClapParser;
+use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
-use std::{
-    fs,
-    io::Write,
-    process::{Command, Stdio},
-};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::{fs, io::Write};
+
+#[derive(Debug, Clone, ClapParser)]
+struct Arguments {
+    #[arg(short, long, default_value = "snippets.json")]
+    snippets: PathBuf,
+
+    #[arg(short, long)]
+    markdown_file: PathBuf,
+}
 
 fn main() -> anyhow::Result<()> {
-    // Read the Markdown file from disk
-    let input = fs::read_to_string("example.md").unwrap();
+    let args = Arguments::parse();
 
-    // Parse the Markdown input into events
+    let snippets = fs::read_to_string(args.snippets).unwrap();
+    let snippets: HashMap<String, String> = serde_json::from_str(&snippets)?;
+
+    let input = fs::read_to_string(args.markdown_file).unwrap();
+
     let parser = Parser::new(&input);
 
-    // Iterate over the events and process code blocks
     let mut in_code_block = false;
+    let mut current_snippet = None;
 
     let mut i = parser.map(|event| match event {
         Event::Start(Tag::CodeBlock(ref kind)) => {
-            dbg!(kind);
+            if let CodeBlockKind::Fenced(text) = kind {
+                let marker = text
+                    .split(", ")
+                    .filter(|s| s.starts_with("marker:"))
+                    .collect::<Vec<_>>()
+                    .pop();
+                dbg!(&marker);
+                if let Some(marker) = marker {
+                    let marker = marker.split_once(':').unwrap().1;
+                    if let Some(value) = snippets.get(marker) {
+                        current_snippet = Some(value);
+                    }
+                }
+            }
             in_code_block = true;
             event
         }
         Event::Text(text) if in_code_block => {
-            let formatted_code = format_rust_code_block(&text);
-            Event::Text(formatted_code.into())
+            if let Some(value) = current_snippet.take() {
+                Event::Text(pulldown_cmark::CowStr::Borrowed(value))
+            } else {
+                Event::Text(text)
+            }
         }
         Event::End(Tag::CodeBlock(_)) => {
             in_code_block = false;
@@ -62,6 +89,7 @@ fn format_rust_code_block_crate(code: &str) -> String {
 }
 */
 
+/*
 fn format_rust_code_block(code: &str) -> String {
     // Run the rustfmt command line tool on the code block
     let output = Command::new("rustfmt")
@@ -84,3 +112,4 @@ fn format_rust_code_block(code: &str) -> String {
         }
     }
 }
+*/
