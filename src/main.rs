@@ -1,88 +1,55 @@
-use pulldown_cmark::{Event, Parser, Tag};
-use pulldown_cmark_to_cmark::cmark;
-use std::{
-    fs,
-    io::Write,
-    process::{Command, Stdio},
-};
+use std::{collections::HashMap, path::PathBuf};
+
+use crate::parser::{Rule, SnippetParser};
+use clap::Parser as ClapParser;
+use pest::Parser;
+use walkdir::DirEntry;
+
+mod parser;
+
+#[derive(Debug, ClapParser)]
+#[command(author, version)]
+pub struct Arguments {
+    #[arg(short, long)]
+    directory: PathBuf,
+
+    #[arg(short, long, default_value = "snippets.json")]
+    output: PathBuf,
+}
+
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| s.starts_with("."))
+        .unwrap_or(false)
+}
 
 fn main() -> anyhow::Result<()> {
-    // Read the Markdown file from disk
-    let input = fs::read_to_string("example.md").unwrap();
+    let args = Arguments::parse();
 
-    // Parse the Markdown input into events
-    let parser = Parser::new(&input);
+    let mut map = HashMap::new();
 
-    // Iterate over the events and process code blocks
-    let mut in_code_block = false;
-    let mut code_block = String::new();
+    for entry in walkdir::WalkDir::new(args.directory)
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e))
+        .filter_map(|e| e.ok())
+    {
+        if entry.path().is_file() {
+            let content = std::fs::read_to_string(entry.path())?;
 
-    let mut i = parser.map(|event| match event {
-        Event::Start(Tag::CodeBlock(ref kind)) => {
-            dbg!(kind);
-            in_code_block = true;
-            code_block = String::new();
-            event
+            let pairs = SnippetParser::parse(Rule::file, &content)?;
+            for pair in pairs.into_iter().next().unwrap().into_inner() {
+                if pair.as_rule() == Rule::snippet {
+                    let mut snippet = pair.into_inner().into_iter();
+                    let identifier = snippet.next().unwrap().as_str().to_string();
+                    let snippet_text = snippet.next().unwrap().as_str().to_string();
+                    map.insert(identifier, snippet_text);
+                }
+            }
         }
-        Event::Text(text) if in_code_block => {
-            let formatted_code = format_rust_code_block(&text);
-            Event::Text(formatted_code.into())
-        }
-        Event::End(Tag::CodeBlock(_)) => {
-            in_code_block = false;
-            event
-        }
-        _ => event,
-    });
-
-    let mut buf = String::with_capacity(input.len() + 1000);
-    let state = cmark(&mut i, &mut buf)?;
-    dbg!(state);
-
-    let mut stdout = std::io::stdout();
-
-    stdout.write_all(buf.as_bytes())?;
+    }
+    let json = serde_json::to_string_pretty(&map)?;
+    std::fs::write(args.output, json)?;
     Ok(())
-}
-
-/*
-fn format_rust_code_block_crate(code: &str) -> String {
-    // Set up Rustfmt configuration with default options
-    let mut config = Config::default();
-    config.set().emit_mode(EmitMode::Stdout);
-
-    // Run Rustfmt on the code block
-    let input = Input::Text(code.to_owned());
-    let mut output = Vec::new();
-    if let Err(e) = rustfmt::format_input(input, &config, Some(&mut output)) {
-        eprintln!("Failed to format Rust code: {:?}", e);
-        return code.to_owned();
-    }
-
-    // Return the formatted code as a String
-    String::from_utf8_lossy(&output).into_owned()
-}
-*/
-
-fn format_rust_code_block(code: &str) -> String {
-    // Run the rustfmt command line tool on the code block
-    let output = Command::new("rustfmt")
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .arg("--edition=2021")
-        .spawn()
-        .and_then(|mut child| {
-            child.stdin.as_mut().unwrap().write_all(code.as_bytes())?;
-            let output = child.wait_with_output()?;
-            Ok(output.stdout)
-        });
-
-    // Return the formatted code as a String, or the original code block if there was an error
-    match output {
-        Ok(formatted_output) => String::from_utf8_lossy(&formatted_output).into_owned(),
-        Err(e) => {
-            eprintln!("Failed to format Rust code: {:?}", e);
-            code.to_owned()
-        }
-    }
 }
