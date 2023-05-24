@@ -3,4 +3,5 @@
 members = [
     "snippet-extractor",
     "markdown-snippet-inserter",
-] 
+    "codeblock-button-inserter",
+]
