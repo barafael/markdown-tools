@@ -29,9 +29,9 @@ _paginate: false
 
 # Grundlage: Iteratoren in Rust
 
-```rust no_run, marker:test1
-replace
-```
+````rust no_run, marker:test1
+marker marker marker
+````
 
 Ziemlich viele Rust Konzepte in diesem Snippet!
 
@@ -40,26 +40,35 @@ Ziemlich viele Rust Konzepte in diesem Snippet!
 
 ---
 
-```rust
+````rust
 pub trait Iterator {
     type Item;
 
     fn next(&mut self) -> Option<Self::Item>;
 }
-```
+````
 
 ---
 
 # A main method
 
-```rust marker:main
-replace
-```
+````rust marker:main
+fn main() -> anyhow::Result<()> {
+    // Read the Markdown file from disk
+    let input = fs::read_to_string("example.md").unwrap();
+
+    // Parse the Markdown input into events
+    let parser = Parser::new(&input);
+
+    // Iterate over the events and process code blocks
+    let mut in_code_block = false;
+````
 
 ---
 
 # Peaches
 
-```marker:peaches
-replace
-```
+````marker:peaches
+let a = 4;
+let a = 5;
+````

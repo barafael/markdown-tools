@@ -12,6 +12,9 @@ struct Arguments {
 
     #[arg(short, long)]
     markdown_file: PathBuf,
+
+    #[arg(short, long)]
+    output: Option<PathBuf>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -29,15 +32,17 @@ fn main() -> anyhow::Result<()> {
 
     let mut i = parser.map(|event| match event {
         Event::Start(Tag::CodeBlock(ref kind)) => {
+            println!("start code block: {kind:?}");
             if let CodeBlockKind::Fenced(text) = kind {
                 let marker = text
-                    .split(", ")
+                    .split(" ")
                     .filter(|s| s.starts_with("marker:"))
                     .collect::<Vec<_>>()
                     .pop();
                 if let Some(marker) = marker {
                     let marker = marker.split_once(':').unwrap().1;
                     if let Some(value) = snippets.get(marker) {
+                        dbg!(&value);
                         let dedented = textwrap::dedent(value);
                         current_snippet = Some(dedented);
                     }
@@ -47,25 +52,34 @@ fn main() -> anyhow::Result<()> {
             event
         }
         Event::Text(text) if in_code_block => {
+            println!("Text event");
+            println!("{current_snippet:?}");
             if let Some(value) = current_snippet.take() {
+                println!("Replacing {text} with {value}");
                 Event::Text(pulldown_cmark::CowStr::Boxed(value.into()))
             } else {
                 Event::Text(text)
             }
         }
         Event::End(Tag::CodeBlock(_)) => {
+            println!("Ending codeblock.");
             in_code_block = false;
+            current_snippet = None;
             event
         }
         _ => event,
     });
 
-    let mut buf = String::with_capacity(input.len() + 1000);
+    let mut buf = String::with_capacity(input.len());
     let _state = cmark(&mut i, &mut buf)?;
 
-    let mut stdout = std::io::stdout();
+    if let Some(path) = args.output {
+        std::fs::write(path, buf)?;
+    } else {
+        let mut stdout = std::io::stdout();
+        stdout.write_all(buf.as_bytes())?;
+    }
 
-    stdout.write_all(buf.as_bytes())?;
     Ok(())
 }
 

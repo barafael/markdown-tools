@@ -29,37 +29,18 @@ _paginate: false
 
 # Grundlage: Iteratoren in Rust
 
-```rust no_run, marker:test1
-replace
-```
+````rust, no_run, marker:test1, context:iterator
+pub trait Iterator {
+    type Item;
 
+    fn next(&mut self) -> Option<Self::Item>;
+}
+````
+
+<button name="button" onclick="console.log('iterator')">Click me</button>
 Ziemlich viele Rust Konzepte in diesem Snippet!
 
 * Assoziierter Typ `Item`: erlaubt es, den Element-Typ festzulegen
 * Methode `next`: Nächstes Element, oder `None`
 
 ---
-
-```rust
-pub trait Iterator {
-    type Item;
-
-    fn next(&mut self) -> Option<Self::Item>;
-}
-```
-
----
-
-# A main method
-
-```rust marker:main
-replace
-```
-
----
-
-# Peaches
-
-```marker:peaches
-replace
-```

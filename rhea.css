@@ -1,0 +1,53 @@
+/* @theme rhea */
+
+@import 'gaia';
+
+section {
+    background-color: #fff8e1;
+}
+
+.hljs-title {
+    text-decoration: none !important;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+    color: #9a9a9a;
+}
+
+.hljs-meta {
+    color: #ccc;
+}
+
+code {
+    border-radius: 4px;
+}
+
+pre {
+    border-radius: 8px;
+}
+
+h1 {
+    font-size: 1.8em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h3 {
+    font-size: 1.3em;
+}
+
+h4 {
+    font-size: 1.1em;
+}
+
+h5 {
+    font-size: 1em;
+}
+
+h6 {
+    font-size: 0.9em;
+}

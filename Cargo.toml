@@ -1,7 +1,9 @@
 [workspace]
 
+resolver = "2"
+
 members = [
-    "snippet-extractor",
-    "markdown-snippet-inserter",
     "codeblock-button-inserter",
+    "markdown-snippet-inserter",
+    "snippet-extractor",
 ]

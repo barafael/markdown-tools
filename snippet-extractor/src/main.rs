@@ -25,10 +25,12 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .unwrap_or(false)
 }
 
+pub type Snippet = HashMap<String, String>;
+
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
-    let mut map = HashMap::new();
+    let mut map = Snippet::new();
 
     for entry in walkdir::WalkDir::new(args.directory)
         .into_iter()
@@ -38,9 +40,9 @@ fn main() -> anyhow::Result<()> {
         if entry.path().is_file() {
             let content = std::fs::read_to_string(entry.path())?;
 
-            let pairs = SnippetParser::parse(Rule::file, &content)?;
+            let pairs = SnippetParser::parse(Rule::File, &content)?;
             for pair in pairs.into_iter().next().unwrap().into_inner() {
-                if pair.as_rule() == Rule::snippet {
+                if pair.as_rule() == Rule::Snippet {
                     let mut snippet = pair.into_inner();
                     let identifier = snippet.next().unwrap().as_str().to_string();
                     let snippet_text = snippet.next().unwrap().as_str().to_string();
