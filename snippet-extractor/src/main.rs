@@ -21,8 +21,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with('.'))
-        .unwrap_or(false)
+        .map_or(false, |s| s.starts_with('.'))
 }
 
 pub type Snippet = HashMap<String, String>;
@@ -35,7 +34,7 @@ fn main() -> anyhow::Result<()> {
     for entry in walkdir::WalkDir::new(args.directory)
         .into_iter()
         .filter_entry(|e| !is_hidden(e))
-        .filter_map(|e| e.ok())
+        .filter_map(Result::ok)
     {
         if entry.path().is_file() {
             let content = std::fs::read_to_string(entry.path())?;

@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
             println!("start code block: {kind:?}");
             if let CodeBlockKind::Fenced(text) = kind {
                 let marker = text
-                    .split(" ")
+                    .split(' ')
                     .filter(|s| s.starts_with("marker:"))
                     .collect::<Vec<_>>()
                     .pop();
