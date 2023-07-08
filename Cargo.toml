@@ -5,6 +5,7 @@ members = [
     "markdown-snippet-inserter",
     "snippet-extractor",
     "snippet",
+    "markdown-linkify",
 ]
 
 resolver = "2"

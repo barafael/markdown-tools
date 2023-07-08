@@ -1,0 +1,11 @@
+[[replacements]]
+type = "Regex"
+pattern = 'PS-(?<s>\d+)'
+replacement = "https://www.jira.com/SP-$s"
+limit = 1
+
+[[replacements]]
+type = "Regex"
+pattern = '(?<p>GRTP-\d+)'
+replacement = "http://www.grtp.de/issue/$p"
+limit = 0
