@@ -1,7 +1,7 @@
 use clap::Parser as ClapParser;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
-use std::collections::HashMap;
+use snippet::Snippets;
 use std::path::PathBuf;
 use std::{fs, io::Write};
 
@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
     let snippets = fs::read_to_string(args.snippets).unwrap();
-    let snippets: HashMap<String, String> = serde_json::from_str(&snippets)?;
+    let snippets: Snippets = serde_json::from_str(&snippets)?;
 
     let input = fs::read_to_string(args.markdown_file).unwrap();
 
@@ -42,8 +42,8 @@ fn main() -> anyhow::Result<()> {
                 if let Some(marker) = marker {
                     let marker = marker.split_once(':').unwrap().1;
                     if let Some(value) = snippets.get(marker) {
-                        dbg!(&value);
-                        let dedented = textwrap::dedent(value);
+                        let content = &value.content;
+                        let dedented = textwrap::dedent(content);
                         current_snippet = Some(dedented);
                     }
                 }

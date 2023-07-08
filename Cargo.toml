@@ -4,6 +4,7 @@ members = [
     "codeblock-button-inserter",
     "markdown-snippet-inserter",
     "snippet-extractor",
+    "snippet",
 ]
 
 resolver = "2"

@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
 
     // Iterate over the events and process code blocks
     let mut in_code_block = false;
-// marker-end main
+    // marker-end main
 
     let mut i = parser.map(|event| match event {
         Event::Start(Tag::CodeBlock(ref kind)) => {

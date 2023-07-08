@@ -1,8 +1,9 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::path::PathBuf;
 
 use crate::parser::{Rule, SnippetParser};
 use clap::Parser as ClapParser;
 use pest::Parser;
+use snippet::{Snippet, Snippets};
 use walkdir::DirEntry;
 
 mod parser;
@@ -24,12 +25,10 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .map_or(false, |s| s.starts_with('.'))
 }
 
-pub type Snippet = HashMap<String, String>;
-
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
-    let mut map = Snippet::new();
+    let mut map = Snippets::new();
 
     for entry in walkdir::WalkDir::new(args.directory)
         .into_iter()
@@ -42,10 +41,17 @@ fn main() -> anyhow::Result<()> {
             let pairs = SnippetParser::parse(Rule::File, &content)?;
             for pair in pairs.into_iter().next().unwrap().into_inner() {
                 if pair.as_rule() == Rule::Snippet {
+                    let (line, col) = pair.line_col();
                     let mut snippet = pair.into_inner();
                     let identifier = snippet.next().unwrap().as_str().to_string();
                     let snippet_text = snippet.next().unwrap().as_str().to_string();
-                    map.insert(identifier, snippet_text);
+                    let snippet = Snippet {
+                        content: snippet_text,
+                        file: entry.path().canonicalize()?,
+                        line,
+                        col,
+                    };
+                    map.insert(identifier, snippet);
                 }
             }
         }

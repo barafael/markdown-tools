@@ -89,3 +89,25 @@ begin_block src rust marker:test1
 replace+link
 end_block
 ```
+
+---
+
+# How to hack a run button into the html
+
+```html
+<button style="
+    height: fit-content;
+    margin: 5px;
+    font-weight: bold;
+">Run</button>
+```
+
+```html
+<div data-marp-auto-scaling-wrapper="" style="
+    display: flex;
+"><svg part="svg" data-marp-auto-scaling-svg="" viewBox="0 0 1140 190" preserveAspectRatio="xMinYMid meet" style=""><foreignObject width="1140" height="190"><span data-marp-auto-scaling-container="" style="margin-left: 0px; margin-right: auto;"><slot></slot></span></foreignObject></svg><button style="
+    height: fit-content;
+    margin: 5px;
+    font-weight: bold;
+">Run</button></div>
+```
