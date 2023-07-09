@@ -1,14 +1,10 @@
 use std::fmt::Debug;
 
-use serde::{Deserialize, Serialize};
+use regex::Regex;
 
-#[derive(Debug, Clone, Default, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct LinkInfo {
-    pub title: Option<String>,
-    pub link: String,
-}
+use crate::LinkMetadata;
 
 pub trait Replacer: Debug {
-    fn apply(&self, snippet: &str) -> Option<LinkInfo>;
-    fn pattern(&self) -> String;
+    fn apply(&self, metadata: &mut LinkMetadata, snippet: &str) -> anyhow::Result<()>;
+    fn pattern(&self) -> Regex;
 }

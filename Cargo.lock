@@ -681,7 +681,6 @@ dependencies = [
  "reqwest",
  "select",
  "serde",
- "serde_json",
  "serde_regex",
  "tempdir",
  "toml",

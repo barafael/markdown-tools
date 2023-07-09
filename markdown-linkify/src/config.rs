@@ -27,9 +27,8 @@ pub enum Replacement {
 
 impl Config {
     pub fn register_callback(&mut self, cb: Box<dyn Replacer>) {
-        let pattern = Regex::new(cb.pattern().as_str()).unwrap();
         self.replacements.push(Replacement::Custom {
-            pattern,
+            pattern: cb.pattern(),
             replacer: cb,
         });
     }

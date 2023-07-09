@@ -1,3 +1,4 @@
+use anyhow::Context;
 use clap::Parser as ClapParser;
 use markdown_linkify::config::Config;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlangReplacer;
@@ -33,20 +34,25 @@ fn main() -> anyhow::Result<()> {
     };
     println!("{}", toml::to_string_pretty(&config).unwrap());
     */
-    let config = fs::read_to_string(&args.config)?;
+    let config = fs::read_to_string(&args.config)
+        .with_context(|| format!("Failed to read config file at {:?}", args.config))?;
     let mut config: Config = toml::from_str(&config)?;
 
     config.register_callback(Box::new(DocsRustlangReplacer::new()));
     config.register_callback(Box::new(DocsrsReplacer::new()));
 
-    let input = fs::read_to_string(args.input).unwrap();
+    let input = fs::read_to_string(&args.input)
+        .with_context(|| format!("Failed to read input file: {:?}", args.input))?;
 
     let buf = linkify(&input, &config)?;
-    if let Some(path) = args.output {
-        std::fs::write(path, buf)?;
+    if let Some(path) = &args.output {
+        std::fs::write(path, buf)
+            .with_context(|| format!("Failed to write output file: {:?}", args.output))?;
     } else {
         let mut stdout = std::io::stdout();
-        stdout.write_all(buf.as_bytes())?;
+        stdout
+            .write_all(buf.as_bytes())
+            .context("Failed to write to stdout")?;
     }
 
     Ok(())

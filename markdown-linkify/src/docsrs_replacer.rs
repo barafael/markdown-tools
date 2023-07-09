@@ -1,4 +1,6 @@
-use crate::{replacer::LinkInfo, Replacer};
+use crate::LinkMetadata;
+use crate::Replacer;
+use regex::Regex;
 use select::document::Document;
 use select::predicate::Name;
 
@@ -14,7 +16,11 @@ impl DocsrsReplacer {
 }
 
 impl Replacer for DocsrsReplacer {
-    fn apply(&self, snippet: &str) -> Option<LinkInfo> {
+    fn pattern(&self) -> Regex {
+        Regex::new(r"docsrs:(?<i>.+)").unwrap()
+    }
+
+    fn apply(&self, meta: &mut LinkMetadata, snippet: &str) -> anyhow::Result<()> {
         let page = self.client.get(snippet).send().unwrap();
         let doc = Document::from(page.text().unwrap().as_str());
         let title = doc.find(Name("title")).next().unwrap();
@@ -27,13 +33,9 @@ impl Replacer for DocsrsReplacer {
             .next()
             .unwrap()
             .to_string();
-        Some(LinkInfo {
-            title: Some(name),
-            link: snippet.to_string(),
-        })
-    }
-
-    fn pattern(&self) -> String {
-        r"docsrs:(?<i>.+)".to_string()
+        meta.title = Some(name.clone());
+        meta.text = Some(name);
+        meta.destination = snippet.to_string();
+        Ok(())
     }
 }
