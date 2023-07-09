@@ -1,5 +1,5 @@
 use regex::Regex;
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 use crate::{LinkMetadata, Replacer};
 
@@ -20,7 +20,7 @@ impl Replacer for DocsRustlangReplacer {
     }
 
     fn apply(&self, meta: &mut LinkMetadata, snippet: &str) -> anyhow::Result<()> {
-        let tmp_dir = TempDir::new("rustdoc-temp")?;
+        let tmp_dir = TempDir::new()?;
         let test_file_path = tmp_dir.path().join("snippet.rs");
         std::fs::write(&test_file_path, format!("/// [{snippet}]\npub struct X;"))?;
 
