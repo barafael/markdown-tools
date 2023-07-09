@@ -5,13 +5,13 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.71"
-clap = { version = "4.3.0", features = ["derive"] }
-pulldown-cmark = "0.9.2"
+clap = { version = "4.3.11", features = ["derive"] }
+pulldown-cmark = "0.9.3"
 pulldown-cmark-to-cmark = "10.0.4"
-regex = { version = "1.8.4" }
+regex = { version = "1.9.1" }
 reqwest = { version = "0.11.18", features = ["blocking"] }
 select = "0.6.0"
-serde = { version = "1.0.163", features = ["derive"] }
+serde = { version = "1.0.170", features = ["derive"] }
 serde_regex = "1.1.0"
 tempdir = "0.3.7"
 toml = "0.7.6"
