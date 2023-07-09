@@ -4,6 +4,7 @@ pub use replacer::Replacer;
 
 pub mod config;
 pub mod docs_rustlang_replacer;
+pub mod docsrs_replacer;
 mod replacer;
 
 use pulldown_cmark::{Event, Parser, Tag};
@@ -16,11 +17,11 @@ pub fn linkify(input: &str, config: &config::Config) -> anyhow::Result<String> {
     let mut current_link = None;
 
     let mut i = parser.map(|event| match event {
-        Event::Start(Tag::Link(ref item_type, ref destination, ref title)) => {
+        Event::Start(Tag::Link(ref item_type, ref destination, ref _title)) => {
             if destination.is_empty() {
                 in_empty_link = true;
             }
-            Event::Start(Tag::Link(*item_type, destination.clone(), title.clone()))
+            Event::Start(Tag::Link(*item_type, destination.clone(), "test".into()))
         }
         Event::Text(ref text) if in_empty_link => {
             let mut text = text.clone();
@@ -37,22 +38,23 @@ pub fn linkify(input: &str, config: &config::Config) -> anyhow::Result<String> {
                             break;
                         }
                     }
-                    Replacement::Replacer { pattern, replacer } => {
-                        let result = if pattern.is_match(&text) {
-                            let result = pattern.replacen(&text, 1, "$i");
-                            if let Some(new) = replacer.apply(result.to_string().as_str()) {
-                                current_link = Some(new.to_string());
-                            }
-                            result.to_string()
-                        } else {
-                            break;
+                    Replacement::Custom { pattern, replacer } => {
+                        if !pattern.is_match(&text) {
+                            continue;
+                        }
+                        let result = pattern.replacen(&text, 1, "$i").to_string();
+                        let Some(link_info) = replacer.apply(result.to_string().as_str()) else {
+                            continue;
                         };
                         text = result.into();
+                        current_link = Some(link_info.link);
+                        if let Some(title) = link_info.title {
+                            text = title.into();
+                        }
                     }
                 }
             }
-            let new_text = text.to_string();
-            Event::Text(new_text.into())
+            Event::Text(text)
         }
         Event::End(Tag::Link(item_type, destination, ref title)) if in_empty_link => {
             in_empty_link = false;

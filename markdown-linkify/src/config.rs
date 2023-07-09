@@ -18,7 +18,7 @@ pub enum Replacement {
         limit: usize,
     },
     #[serde(skip_serializing, skip_deserializing)]
-    Replacer {
+    Custom {
         #[serde(with = "serde_regex")]
         pattern: Regex,
         replacer: Box<dyn Replacer>,
@@ -26,8 +26,9 @@ pub enum Replacement {
 }
 
 impl Config {
-    pub fn register_callback(&mut self, pattern: Regex, cb: Box<dyn Replacer>) {
-        self.replacements.push(Replacement::Replacer {
+    pub fn register_callback(&mut self, cb: Box<dyn Replacer>) {
+        let pattern = Regex::new(cb.pattern().as_str()).unwrap();
+        self.replacements.push(Replacement::Custom {
             pattern,
             replacer: cb,
         });

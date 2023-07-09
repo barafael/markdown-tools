@@ -1,7 +1,7 @@
 use regex::Regex;
 use tempdir::TempDir;
 
-use crate::Replacer;
+use crate::{replacer::LinkInfo, Replacer};
 
 #[derive(Debug, Clone, Default)]
 pub struct DocsRustlangReplacer {
@@ -15,7 +15,7 @@ impl DocsRustlangReplacer {
 }
 
 impl Replacer for DocsRustlangReplacer {
-    fn apply(&self, snippet: &str) -> Option<String> {
+    fn apply(&self, snippet: &str) -> Option<LinkInfo> {
         let tmp_dir = TempDir::new("rustdoc-temp").ok()?;
         let test_file_path = tmp_dir.path().join("snippet.rs");
         std::fs::write(&test_file_path, format!("/// [{snippet}]\npub struct X;")).ok()?;
@@ -35,14 +35,18 @@ impl Replacer for DocsRustlangReplacer {
 
         let result_file_path = tmp_dir.path().join("snippet").join("index.html");
 
-        //loop {
-        //std::thread::sleep(Duration::from_secs(1));
-        //}
-
         let html = std::fs::read_to_string(result_file_path).ok()?;
         let regex = Regex::new(r###"(?<l>https://doc.rust-lang.org/[^"]+)""###).unwrap();
-        let (_full, [thing]) = regex.captures(html.as_str()).unwrap().extract();
+        let (_full, [link]) = regex.captures(html.as_str()).unwrap().extract();
 
-        Some(thing.to_string())
+        Some(LinkInfo {
+            //title: Some(snippet.to_string()),
+            title: None,
+            link: link.to_string(),
+        })
+    }
+
+    fn pattern(&self) -> String {
+        r"rust:(?<i>.+)".to_string()
     }
 }

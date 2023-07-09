@@ -1,8 +1,8 @@
 use clap::Parser as ClapParser;
 use markdown_linkify::config::Config;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlangReplacer;
+use markdown_linkify::docsrs_replacer::DocsrsReplacer;
 use markdown_linkify::linkify;
-use regex::Regex;
 use std::path::PathBuf;
 use std::{fs, io::Write};
 
@@ -36,11 +36,8 @@ fn main() -> anyhow::Result<()> {
     let config = fs::read_to_string(&args.config)?;
     let mut config: Config = toml::from_str(&config)?;
 
-    let librs_replacer = DocsRustlangReplacer::new();
-    config.register_callback(
-        Regex::new(r#"rust:(?<i>.+)"#).unwrap(),
-        Box::new(librs_replacer),
-    );
+    config.register_callback(Box::new(DocsRustlangReplacer::new()));
+    config.register_callback(Box::new(DocsrsReplacer::new()));
 
     let input = fs::read_to_string(args.input).unwrap();
 
