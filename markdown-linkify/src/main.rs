@@ -1,9 +1,10 @@
 use anyhow::Context;
 use clap::Parser as ClapParser;
-use markdown_linkify::config::Config;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlangReplacer;
 use markdown_linkify::docsrs_replacer::DocsrsReplacer;
-use markdown_linkify::linkify;
+use markdown_linkify::regex::RegexReplacer;
+use markdown_linkify::{linkify, Replacer};
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::{fs, io::Write};
 
@@ -21,30 +22,37 @@ struct Arguments {
     output: Option<PathBuf>,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Replacers {
+    regexes: Vec<RegexReplacer>,
+}
+
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
     /*
-    let config = Config {
-        replacements: vec![Replacement::Regex {
-            pattern: Regex::new(r"SP-(?<s>\d+)").unwrap(),
-            replacement: "jira.com/SP-$s".to_string(),
-            limit: 3,
-        }],
+    let example: Replacers = Replacers {
+        regexes: vec![RegexReplacer::example(), RegexReplacer::example()],
     };
-    println!("{}", toml::to_string_pretty(&config).unwrap());
+    println!("{}", toml::to_string_pretty(&example).unwrap());
     */
-    let config = fs::read_to_string(&args.config)
-        .with_context(|| format!("Failed to read config file at {:?}", args.config))?;
-    let mut config: Config = toml::from_str(&config)?;
 
-    config.register_callback(Box::new(DocsRustlangReplacer::new()));
-    config.register_callback(Box::new(DocsrsReplacer::new()));
+    let regex_replacers = fs::read_to_string(&args.config)
+        .with_context(|| format!("Failed to read config file at {:?}", args.config))?;
+    let regex_replacers: Replacers = toml::from_str(&regex_replacers)?;
+
+    let mut replacers: Vec<Box<dyn Replacer>> = Vec::new();
+
+    for replacer in regex_replacers.regexes {
+        replacers.push(Box::new(replacer));
+    }
+    replacers.push(Box::new(DocsRustlangReplacer::new()));
+    replacers.push(Box::new(DocsrsReplacer::new()));
 
     let input = fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {:?}", args.input))?;
 
-    let buf = linkify(&input, &config)?;
+    let buf = linkify(&input, &replacers)?;
     if let Some(path) = &args.output {
         std::fs::write(path, buf)
             .with_context(|| format!("Failed to write output file: {:?}", args.output))?;

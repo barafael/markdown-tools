@@ -1,11 +1,6 @@
-use config::{Config, Replacement};
+mod transform;
 
-pub use replacer::Replacer;
-
-pub mod config;
-pub mod docs_rustlang_replacer;
-pub mod docsrs_replacer;
-mod replacer;
+pub use transform::*;
 
 use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
@@ -18,13 +13,13 @@ pub struct LinkMetadata {
     title: Option<String>,
 }
 
-pub fn linkify(input: &str, config: &config::Config) -> anyhow::Result<String> {
+pub fn linkify(input: &str, replacers: &[Box<dyn Replacer>]) -> anyhow::Result<String> {
     let parser = Parser::new(input);
 
     let mut metadata = None;
 
     let i = parser
-        .map(|event| process_replacement(event, &mut metadata, config))
+        .map(|event| process_replacement(event, &mut metadata, replacers))
         .collect::<anyhow::Result<Vec<Vec<Event<'_>>>>>()?
         .iter()
         .flatten()
@@ -39,7 +34,7 @@ pub fn linkify(input: &str, config: &config::Config) -> anyhow::Result<String> {
 fn process_replacement<'a>(
     event: Event<'a>,
     metadata: &mut Option<LinkMetadata>,
-    config: &Config,
+    replacers: &[Box<dyn Replacer>],
 ) -> anyhow::Result<Vec<Event<'a>>> {
     match event {
         ref event @ Event::Start(Tag::Link(ref _item_type, ref destination, ref title)) => {
@@ -63,7 +58,7 @@ fn process_replacement<'a>(
         }
         Event::End(Tag::Link(item_type, ref destination, ref title)) => {
             if let Some(mut meta) = metadata.take() {
-                apply_replacement(&mut meta, config)?;
+                apply_replacement(&mut meta, replacers)?;
                 let title = meta.title.unwrap_or_else(|| title.to_string());
                 Ok(vec![
                     Event::Text(meta.text.unwrap_or_default().into()),
@@ -81,36 +76,12 @@ fn process_replacement<'a>(
     }
 }
 
-fn apply_replacement(meta: &mut LinkMetadata, config: &Config) -> anyhow::Result<()> {
-    for replacement in &config.replacements {
-        match replacement {
-            Replacement::Regex {
-                pattern,
-                replacement,
-                limit,
-            } => {
-                if !pattern.is_match(&meta.destination) {
-                    continue;
-                }
-                let url = pattern
-                    .replacen(&meta.destination, *limit, replacement)
-                    .clone();
-                meta.destination = url.to_string();
-                if meta.text.is_none() {
-                    meta.text = Some(meta.destination.clone());
-                }
-                if meta.title.is_none() {
-                    meta.title = Some(meta.destination.clone());
-                }
-            }
-            Replacement::Custom { pattern, replacer } => {
-                if !pattern.is_match(&meta.destination) {
-                    continue;
-                }
-                let result = pattern.replacen(&meta.destination, 1, "$i").to_string();
-                replacer.apply(meta, &result)?;
-            }
+fn apply_replacement(meta: &mut LinkMetadata, config: &[Box<dyn Replacer>]) -> anyhow::Result<()> {
+    for replacement in config {
+        if !replacement.pattern().is_match(&meta.destination) {
+            continue;
         }
+        replacement.apply(meta)?;
     }
     Ok(())
 }

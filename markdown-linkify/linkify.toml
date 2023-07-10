@@ -1,12 +1,9 @@
-[[replacements]]
-type = "Regex"
+[[regexes]]
 pattern = 'PS-(?<s>\d+)'
 replacement = "https://www.jira.com/PS-$s"
 limit = 1
 
-[[replacements]]
-
-type = "Regex"
+[[regexes]]
 pattern = '(?<p>GTPR-\d+)'
 replacement = "http://www.grtp.de/issue/$p"
 limit = 0
