@@ -13,7 +13,7 @@ pub struct Substitution {
 
 impl Substitution {
     pub fn example() -> Self {
-        Substitution {
+        Self {
             pattern: regex::Regex::new(r"PS-(?<s>\d+)").expect("Invalid example regex"),
             replacement: "jira.com/issues/PS-$s".to_string(),
             limit: 3,
