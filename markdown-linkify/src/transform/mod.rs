@@ -8,7 +8,7 @@ pub mod docs_rustlang_replacer;
 pub mod docsrs_replacer;
 pub mod regex;
 
-pub trait Replacer: Debug {
+pub trait LinkTransformer: Debug {
     fn apply(&self, metadata: &mut LinkMetadata) -> anyhow::Result<()>;
     fn pattern(&self) -> Regex;
 }

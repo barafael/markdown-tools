@@ -13,7 +13,7 @@ pub struct LinkMetadata {
     title: Option<String>,
 }
 
-pub fn linkify(input: &str, replacers: &[Box<dyn Replacer>]) -> anyhow::Result<String> {
+pub fn linkify(input: &str, replacers: &[Box<dyn LinkTransformer>]) -> anyhow::Result<String> {
     let parser = Parser::new(input);
 
     let mut metadata = None;
@@ -34,7 +34,7 @@ pub fn linkify(input: &str, replacers: &[Box<dyn Replacer>]) -> anyhow::Result<S
 fn process_replacement<'a>(
     event: Event<'a>,
     metadata: &mut Option<LinkMetadata>,
-    replacers: &[Box<dyn Replacer>],
+    replacers: &[Box<dyn LinkTransformer>],
 ) -> anyhow::Result<Vec<Event<'a>>> {
     match event {
         ref event @ Event::Start(Tag::Link(ref _item_type, ref destination, ref title)) => {
@@ -76,7 +76,10 @@ fn process_replacement<'a>(
     }
 }
 
-fn apply_replacement(meta: &mut LinkMetadata, config: &[Box<dyn Replacer>]) -> anyhow::Result<()> {
+fn apply_replacement(
+    meta: &mut LinkMetadata,
+    config: &[Box<dyn LinkTransformer>],
+) -> anyhow::Result<()> {
     for replacement in config {
         if !replacement.pattern().is_match(&meta.destination) {
             continue;

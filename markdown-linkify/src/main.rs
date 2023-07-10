@@ -1,9 +1,9 @@
 use anyhow::Context;
 use clap::Parser as ClapParser;
-use markdown_linkify::docs_rustlang_replacer::DocsRustlangReplacer;
-use markdown_linkify::docsrs_replacer::DocsrsReplacer;
-use markdown_linkify::regex::RegexReplacer;
-use markdown_linkify::{linkify, Replacer};
+use markdown_linkify::docs_rustlang_replacer::DocsRustlang;
+use markdown_linkify::docsrs_replacer::Docsrs;
+use markdown_linkify::regex::Substitution;
+use markdown_linkify::{linkify, LinkTransformer};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::{fs, io::Write};
@@ -23,8 +23,8 @@ struct Arguments {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Replacers {
-    regexes: Vec<RegexReplacer>,
+pub struct Transformers {
+    regexes: Vec<Substitution>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -39,15 +39,15 @@ fn main() -> anyhow::Result<()> {
 
     let regex_replacers = fs::read_to_string(&args.config)
         .with_context(|| format!("Failed to read config file at {:?}", args.config))?;
-    let regex_replacers: Replacers = toml::from_str(&regex_replacers)?;
+    let regex_replacers: Transformers = toml::from_str(&regex_replacers)?;
 
-    let mut replacers: Vec<Box<dyn Replacer>> = Vec::new();
+    let mut replacers: Vec<Box<dyn LinkTransformer>> = Vec::new();
 
     for replacer in regex_replacers.regexes {
         replacers.push(Box::new(replacer));
     }
-    replacers.push(Box::new(DocsRustlangReplacer::new()));
-    replacers.push(Box::new(DocsrsReplacer::new()));
+    replacers.push(Box::new(DocsRustlang::new()));
+    replacers.push(Box::new(Docsrs::new()));
 
     let input = fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {:?}", args.input))?;

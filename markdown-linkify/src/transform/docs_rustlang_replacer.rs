@@ -2,20 +2,20 @@ use anyhow::Context;
 use regex::Regex;
 use tempfile::TempDir;
 
-use crate::{LinkMetadata, Replacer};
+use crate::{LinkMetadata, LinkTransformer};
 
 #[derive(Debug, Clone, Default)]
-pub struct DocsRustlangReplacer {
+pub struct DocsRustlang {
     _client: reqwest::Client,
 }
 
-impl DocsRustlangReplacer {
+impl DocsRustlang {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl Replacer for DocsRustlangReplacer {
+impl LinkTransformer for DocsRustlang {
     fn pattern(&self) -> Regex {
         Regex::new(r"rust:(?<i>.+)").unwrap()
     }
@@ -59,7 +59,7 @@ impl Replacer for DocsRustlangReplacer {
             .extract();
 
         meta.title = Some(snippet.to_string());
-        meta.text = Some(snippet.to_string());
+        meta.text = Some(snippet);
         meta.destination = link.to_string();
         Ok(())
     }

@@ -1,21 +1,21 @@
-use crate::{LinkMetadata, Replacer};
+use crate::{LinkMetadata, LinkTransformer};
 use anyhow::Context;
 use regex::Regex;
 use select::document::Document;
 use select::predicate::Name;
 
 #[derive(Debug, Clone, Default)]
-pub struct DocsrsReplacer {
+pub struct Docsrs {
     client: reqwest::blocking::Client,
 }
 
-impl DocsrsReplacer {
+impl Docsrs {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl Replacer for DocsrsReplacer {
+impl LinkTransformer for Docsrs {
     fn pattern(&self) -> Regex {
         Regex::new(r"docsrs:(?<i>.+)").unwrap()
     }

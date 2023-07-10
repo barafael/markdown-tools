@@ -1,27 +1,27 @@
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::Replacer;
+use crate::LinkTransformer;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct RegexReplacer {
+pub struct Substitution {
     #[serde(with = "serde_regex")]
     pattern: Regex,
     replacement: String,
     limit: usize,
 }
 
-impl RegexReplacer {
+impl Substitution {
     pub fn example() -> Self {
-        RegexReplacer {
-            pattern: regex::Regex::new(r"PS-(?<s>\d+)").unwrap(),
+        Substitution {
+            pattern: regex::Regex::new(r"PS-(?<s>\d+)").expect("Invalid example regex"),
             replacement: "jira.com/issues/PS-$s".to_string(),
             limit: 3,
         }
     }
 }
 
-impl Replacer for RegexReplacer {
+impl LinkTransformer for Substitution {
     fn pattern(&self) -> Regex {
         self.pattern.clone()
     }
