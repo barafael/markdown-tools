@@ -1,4 +1,5 @@
 mod transform;
+pub mod aggregator;
 
 pub use transform::*;
 
