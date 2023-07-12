@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct LinkMetadata {
     destination: String,
     text: Option<String>,
+    is_code: bool,
     title: Option<String>,
 }
 
@@ -57,12 +58,29 @@ fn process_replacement<'a>(
                 Ok(vec![event.clone()])
             }
         }
+        Event::Code(ref text) => {
+            if let Some(metadata) = metadata {
+                // Set the metadata text for use on end event
+                metadata.text = Some(text.to_string());
+                metadata.is_code = true;
+                Ok(vec![])
+            } else {
+                // If there is no metadata, pass through the event
+                Ok(vec![event.clone()])
+            }
+        }
         Event::End(Tag::Link(item_type, ref destination, ref title)) => {
             if let Some(mut meta) = metadata.take() {
                 apply_replacement(&mut meta, replacers)?;
                 let title = meta.title.unwrap_or_else(|| title.to_string());
+                let text = meta.text.unwrap_or_default().into();
+                let text = if meta.is_code {
+                    Event::Code(text)
+                } else {
+                    Event::Text(text)
+                };
                 Ok(vec![
-                    Event::Text(meta.text.unwrap_or_default().into()),
+                    text,
                     Event::End(Tag::Link(item_type, meta.destination.into(), title.into())),
                 ])
             } else {

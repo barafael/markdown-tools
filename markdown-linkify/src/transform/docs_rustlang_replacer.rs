@@ -29,8 +29,7 @@ impl LinkTransformer for DocsRustlang {
         // Create temporary directory with rust file using our item in the docs
         let tmp_dir = TempDir::new()?;
         let test_file_path = tmp_dir.path().join("snippet.rs");
-        // TODO check if simply a crate-level doc comment works, no more struct X
-        std::fs::write(&test_file_path, format!("/// [{snippet}]\npub struct X;"))?;
+        std::fs::write(&test_file_path, format!("//! [{snippet}]"))?;
 
         // Invoke rustdoc for creating our docs
         let output = std::process::Command::new("rustdoc")
@@ -51,16 +50,20 @@ impl LinkTransformer for DocsRustlang {
         let html = std::fs::read_to_string(result_file_path)?;
 
         // Find URL in generated html
-        let regex =
-            Regex::new(r###"(?<l>https://doc.rust-lang.org/[^"]+)""###).expect("Invalid regex");
+        let regex = Regex::new(r#"(?<l>https://doc.rust-lang.org/[^"]+)""#).expect("Invalid regex");
         let (_full, [link]) = regex
             .captures(html.as_str())
-            .context("No captures found")?
+            .with_context(|| format!("No captures found for {snippet}"))?
             .extract();
 
-        meta.title = Some(snippet.to_string());
-        meta.text = Some(snippet);
+        if meta.title.is_none() || meta.title == Some(String::new()) {
+            meta.title = Some(link.to_string());
+        }
+        if meta.text.is_none() || meta.text == Some(String::new()) {
+            meta.text = Some(snippet);
+        }
         meta.destination = link.to_string();
+        meta.is_code = true;
         Ok(())
     }
 }

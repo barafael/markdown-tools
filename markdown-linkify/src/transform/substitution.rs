@@ -9,6 +9,8 @@ pub struct Substitution {
     pattern: Regex,
     replacement: String,
     limit: usize,
+    #[serde(default)]
+    code: bool,
 }
 
 impl Substitution {
@@ -17,6 +19,7 @@ impl Substitution {
             pattern: regex::Regex::new(r"PS-(?<s>\d+)").expect("Invalid example regex"),
             replacement: "jira.com/issues/PS-$s".to_string(),
             limit: 3,
+            code: false,
         }
     }
 }
@@ -31,13 +34,23 @@ impl LinkTransformer for Substitution {
             .pattern
             .replacen(&metadata.destination, self.limit, &self.replacement)
             .clone();
+        let text = if let Some(caps) = self.pattern.captures(&metadata.destination) {
+            if let Some(text) = caps.name("text") {
+                text.as_str().to_string()
+            } else {
+                snippet.to_string()
+            }
+        } else {
+            snippet.to_string()
+        };
         metadata.destination = snippet.to_string();
         if metadata.text.is_none() {
-            metadata.text = Some(metadata.destination.clone());
+            metadata.text = Some(text);
         }
-        if metadata.title.is_none() {
+        if metadata.title.is_none() || metadata.title == Some(String::new()) {
             metadata.title = Some(metadata.destination.clone());
         }
+        metadata.is_code = self.code;
         Ok(())
     }
 }

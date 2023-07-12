@@ -1,9 +1,10 @@
 [[regexes]]
-pattern = 'PS-(?<s>\d+)'
-replacement = "https://www.jira.com/PS-$s"
+pattern = '(?<text>PS-\d+)'
+replacement = "https://www.jira.com/$text"
 limit = 1
 
 [[regexes]]
-pattern = '(?<p>GTPR-\d+)'
-replacement = "http://www.grtp.de/issue/$p"
+pattern = '(?<text>GTPR-\d+)'
+replacement = "http://www.grtp.de/issue/$text"
 limit = 0
+code = true

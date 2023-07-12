@@ -48,9 +48,13 @@ impl LinkTransformer for Docsrs {
             .next()
             .context("Can't split first word of title")?
             .to_string();
-        meta.title = Some(name.clone());
+
+        if meta.title.is_none() || meta.title == Some(String::new()) {
+            meta.title = Some(url.to_string());
+        }
         meta.text = Some(name);
         meta.destination = url.to_string();
+        meta.is_code = true;
         Ok(())
     }
 }

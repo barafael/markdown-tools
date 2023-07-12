@@ -2,7 +2,7 @@ use anyhow::Context;
 use clap::Parser as ClapParser;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlang;
 use markdown_linkify::docsrs_replacer::Docsrs;
-use markdown_linkify::regex::Substitution;
+use markdown_linkify::substitution::Substitution;
 use markdown_linkify::{linkify, LinkTransformer};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -37,9 +37,12 @@ fn main() -> anyhow::Result<()> {
     println!("{}", toml::to_string_pretty(&example).unwrap());
     */
 
-    let regex_replacers = fs::read_to_string(&args.config)
-        .with_context(|| format!("Failed to read config file at {:?}", args.config))?;
-    let regex_replacers: Transformers = toml::from_str(&regex_replacers)?;
+    let regex_replacers: Transformers =
+        if let Ok(regex_replacers) = fs::read_to_string(&args.config) {
+            toml::from_str(&regex_replacers)?
+        } else {
+            Transformers { regexes: vec![] }
+        };
 
     let mut replacers: Vec<Box<dyn LinkTransformer>> = Vec::new();
 
