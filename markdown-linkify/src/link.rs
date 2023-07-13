@@ -17,7 +17,7 @@ impl<'a> Link<'a> {
             self.destination.clone(),
             self.title.clone(),
         ));
-        let end = Event::Start(Tag::Link(
+        let end = Event::End(Tag::Link(
             self.link_type,
             self.destination.clone(),
             self.title.clone(),
