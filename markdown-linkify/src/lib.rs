@@ -1,5 +1,6 @@
 mod transform;
 pub mod aggregator;
+mod link;
 
 pub use transform::*;
 

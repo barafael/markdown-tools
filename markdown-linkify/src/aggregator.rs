@@ -1,12 +1,6 @@
 use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 
-#[derive(Debug, Clone)]
-pub struct Link<'a> {
-    link_type: LinkType,
-    destination: CowStr<'a>,
-    title: CowStr<'a>,
-    text: Vec<Event<'a>>,
-}
+use crate::link::Link;
 
 #[derive(Debug, Default)]
 enum AggregatorState<'a> {
@@ -85,9 +79,7 @@ impl<'a> AggregatorState<'a> {
 
 #[cfg(test)]
 mod test {
-    use pulldown_cmark::{CowStr, Event, InlineStr, LinkType, Parser};
-
-    use crate::aggregator::Link;
+    use pulldown_cmark::{Event, LinkType, Parser};
 
     use super::AggregatorState;
 
@@ -107,5 +99,19 @@ mod test {
             assert_eq!(link.link_type, LinkType::Inline);
         }
         assert!(state.flush().is_none());
+    }
+
+    #[test]
+    fn aggregates_test_file() {
+        let md = include_str!("../test.md");
+        let mut parser = Parser::new(md);
+
+        let mut state = AggregatorState::default();
+        while let Some(event) = parser.next() {
+            let Some(link) = state.push(event) else {
+                continue;
+            };
+            dbg!(link);
+        }
     }
 }
