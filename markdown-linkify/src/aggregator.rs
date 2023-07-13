@@ -1,9 +1,11 @@
+use std::vec::IntoIter;
+
 use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 
 use crate::link::Link;
 
 #[derive(Debug, Default)]
-enum AggregatorState<'a> {
+enum Aggregator<'a> {
     #[default]
     Empty,
     Start(LinkType, CowStr<'a>, CowStr<'a>),
@@ -17,21 +19,31 @@ enum Aggregation<'a> {
     Link(Link<'a>),
 }
 
-impl<'a> AggregatorState<'a> {
+impl<'a> Aggregation<'a> {
+    pub fn into_iter(self) -> IntoIter<Event<'a>> {
+        match self {
+            Aggregation::Event(e) => vec![e].into_iter(),
+            Aggregation::Bag(vec) => vec.into_iter(),
+            Aggregation::Link(l) => l.into_iter(),
+        }
+    }
+}
+
+impl<'a> Aggregator<'a> {
     fn push(&mut self, event: Event<'a>) -> Option<Aggregation> {
         match (&*self, event) {
-            (AggregatorState::Empty, Event::Start(Tag::Link(link_type, destination, title))) => {
+            (Aggregator::Empty, Event::Start(Tag::Link(link_type, destination, title))) => {
                 *self = Self::Start(link_type, destination, title);
                 None
             }
-            (AggregatorState::Empty, e) => Some(Aggregation::Event(e)),
-            (AggregatorState::Start(link_type, destination, title), e @ Event::Start(..)) => {
+            (Aggregator::Empty, e) => Some(Aggregation::Event(e)),
+            (Aggregator::Start(link_type, destination, title), e @ Event::Start(..)) => {
                 let start = Event::Start(Tag::Link(*link_type, destination.clone(), title.clone()));
                 let agg = Aggregation::Bag(vec![start, e]);
                 *self = Self::Empty;
                 Some(agg)
             }
-            (AggregatorState::Start(link_type, destination, title), Event::End(Tag::Link(..))) => {
+            (Aggregator::Start(link_type, destination, title), Event::End(Tag::Link(..))) => {
                 let result = Link {
                     link_type: *link_type,
                     destination: destination.clone(),
@@ -41,7 +53,7 @@ impl<'a> AggregatorState<'a> {
                 *self = Self::Empty;
                 Some(Aggregation::Link(result))
             }
-            (AggregatorState::Start(link_type, destination, title), e @ Event::Text(..)) => {
+            (Aggregator::Start(link_type, destination, title), e @ Event::Text(..)) => {
                 let link = Link {
                     link_type: *link_type,
                     destination: destination.clone(),
@@ -51,19 +63,19 @@ impl<'a> AggregatorState<'a> {
                 *self = Self::Text(link);
                 None
             }
-            (AggregatorState::Text(link), e @ Event::Text(..)) => {
+            (Aggregator::Text(link), e @ Event::Text(..)) => {
                 let mut new_text = link.clone();
                 new_text.text.push(e);
                 *self = Self::Text(new_text);
                 None
             }
-            (AggregatorState::Text(link), e @ Event::Code(..)) => {
+            (Aggregator::Text(link), e @ Event::Code(..)) => {
                 let mut new_text = link.clone();
                 new_text.text.push(e);
                 *self = Self::Text(new_text);
                 None
             }
-            (AggregatorState::Text(link), Event::End(Tag::Link(..))) => {
+            (Aggregator::Text(link), Event::End(Tag::Link(..))) => {
                 let result = link.clone();
                 *self = Self::Empty;
                 Some(Aggregation::Link(result))
@@ -74,15 +86,23 @@ impl<'a> AggregatorState<'a> {
 
     fn flush(self) -> Option<Link<'a>> {
         match self {
-            AggregatorState::Empty => None,
-            AggregatorState::Start(link_type, destination, title) => Some(Link {
+            Aggregator::Empty => None,
+            Aggregator::Start(link_type, destination, title) => Some(Link {
                 link_type,
                 destination,
                 title,
                 text: vec![],
             }),
-            AggregatorState::Text(link) => Some(link),
+            Aggregator::Text(link) => Some(link),
         }
+    }
+}
+
+impl<'a> Iterator for Aggregator<'a> {
+    type Item = Aggregation<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
     }
 }
 
@@ -92,14 +112,14 @@ mod test {
 
     use crate::aggregator::Aggregation;
 
-    use super::AggregatorState;
+    use super::Aggregator;
 
     #[test]
     fn aggregates_simple_link() {
         let md = "[simple](link \"right?\")";
         let mut parser = Parser::new(md);
 
-        let mut state = AggregatorState::default();
+        let mut state = Aggregator::default();
         while let Some(event) = parser.next() {
             let Some(Aggregation::Link(link)) = state.push(event) else {
                 continue;
@@ -116,7 +136,7 @@ mod test {
         let md = "[``](thing \"titleee?\")";
         let mut parser = Parser::new(md);
 
-        let mut state = AggregatorState::default();
+        let mut state = Aggregator::default();
         while let Some(event) = parser.next() {
             let Some(Aggregation::Link(link)) = state.push(event) else {
                 continue;
@@ -134,7 +154,7 @@ mod test {
         let md = include_str!("../test.md");
         let mut parser = Parser::new(md);
 
-        let mut state = AggregatorState::default();
+        let mut state = Aggregator::default();
         while let Some(event) = parser.next() {
             let Some(link) = state.push(event) else {
                 continue;
@@ -160,12 +180,15 @@ mod test {
         let md = "# HEADING\n[simple](link \"right?\")";
         let mut parser = Parser::new(md);
 
-        let mut state = AggregatorState::default();
+        let mut state = Aggregator::default();
+        let mut parser2 = Parser::new(md);
         while let Some(event) = parser.next() {
             let Some(aggregation) = state.push(event) else {
                 continue;
             };
-            dbg!(aggregation);
+            for elem in aggregation.into_iter() {
+                assert_eq!(Some(elem), parser2.next());
+            }
         }
         assert!(state.flush().is_none());
     }
