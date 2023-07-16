@@ -5,7 +5,7 @@ use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 use crate::link::Link;
 
 #[derive(Debug)]
-enum Aggregation<'a> {
+pub enum Aggregation<'a> {
     Event(Event<'a>),
     Bag(Vec<Event<'a>>),
     Link(Link<'a>),
@@ -22,7 +22,7 @@ impl<'a> Aggregation<'a> {
 }
 
 #[derive(Debug, Default)]
-enum Aggregator<'a> {
+pub enum Aggregator<'a> {
     #[default]
     Empty,
     Start(LinkType, CowStr<'a>, CowStr<'a>),
@@ -30,7 +30,7 @@ enum Aggregator<'a> {
 }
 
 impl<'a> Aggregator<'a> {
-    fn push(&mut self, event: Event<'a>) -> Option<Aggregation> {
+    pub fn push(&'a mut self, event: Event<'a>) -> Option<Aggregation<'a>> {
         match (&*self, event) {
             (Aggregator::Empty, Event::Start(Tag::Link(link_type, destination, title))) => {
                 *self = Self::Start(link_type, destination, title);
@@ -84,16 +84,16 @@ impl<'a> Aggregator<'a> {
         }
     }
 
-    fn flush(self) -> Option<Link<'a>> {
+    pub fn flush(&'a mut self) -> Option<Aggregation<'a>> {
         match self {
             Aggregator::Empty => None,
-            Aggregator::Start(link_type, destination, title) => Some(Link {
-                link_type,
-                destination,
-                title,
+            Aggregator::Start(link_type, destination, title) => Some(Aggregation::Link(Link {
+                link_type: *link_type,
+                destination: destination.clone(),
+                title: title.clone(),
                 text: vec![],
-            }),
-            Aggregator::Text(link) => Some(link),
+            })),
+            Aggregator::Text(link) => Some(Aggregation::Link(link.clone())),
         }
     }
 }
