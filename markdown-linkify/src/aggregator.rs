@@ -4,14 +4,6 @@ use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 
 use crate::link::Link;
 
-#[derive(Debug, Default)]
-enum Aggregator<'a> {
-    #[default]
-    Empty,
-    Start(LinkType, CowStr<'a>, CowStr<'a>),
-    Text(Link<'a>),
-}
-
 #[derive(Debug)]
 enum Aggregation<'a> {
     Event(Event<'a>),
@@ -27,6 +19,14 @@ impl<'a> Aggregation<'a> {
             Aggregation::Link(l) => l.into_iter(),
         }
     }
+}
+
+#[derive(Debug, Default)]
+enum Aggregator<'a> {
+    #[default]
+    Empty,
+    Start(LinkType, CowStr<'a>, CowStr<'a>),
+    Text(Link<'a>),
 }
 
 impl<'a> Aggregator<'a> {
@@ -80,7 +80,7 @@ impl<'a> Aggregator<'a> {
                 *self = Self::Empty;
                 Some(Aggregation::Link(result))
             }
-            (state, event) => Some(Aggregation::Event(event)),
+            (_state, event) => Some(Aggregation::Event(event)),
         }
     }
 
@@ -95,14 +95,6 @@ impl<'a> Aggregator<'a> {
             }),
             Aggregator::Text(link) => Some(link),
         }
-    }
-}
-
-impl<'a> Iterator for Aggregator<'a> {
-    type Item = Aggregation<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
     }
 }
 
@@ -132,6 +124,7 @@ mod test {
         assert!(state.flush().is_none());
     }
 
+    #[test]
     fn aggregates_empty_code() {
         let md = "[``](thing \"titleee?\")";
         let mut parser = Parser::new(md);
@@ -141,7 +134,7 @@ mod test {
             let Some(Aggregation::Link(link)) = state.push(event) else {
                 continue;
             };
-            assert_eq!(link.text, vec![Event::Code("".into())]);
+            assert_eq!(link.text, vec![Event::Text("``".into())]);
             assert_eq!(link.destination, "thing".into());
             assert_eq!(link.title, "titleee?".into());
             assert_eq!(link.link_type, LinkType::Inline);
@@ -171,7 +164,7 @@ mod test {
         }
         let md = "[foo]";
         let cb = &mut callback;
-        let mut parser = Parser::new_with_broken_link_callback(md, Options::empty(), Some(cb));
+        let parser = Parser::new_with_broken_link_callback(md, Options::empty(), Some(cb));
         parser.for_each(drop);
     }
 
