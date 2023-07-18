@@ -4,9 +4,9 @@ use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
 use serde::{Deserialize, Serialize};
 
-pub mod aggregator;
+mod aggregation;
 mod link;
-pub mod linkify;
+pub mod link_aggregator;
 mod transform;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
