@@ -1,12 +1,13 @@
-pub mod aggregator;
-mod link;
-mod transform;
-
 pub use transform::*;
 
 use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
 use serde::{Deserialize, Serialize};
+
+mod aggregation;
+mod link;
+pub mod link_aggregator;
+mod transform;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct LinkMetadata {
@@ -40,14 +41,14 @@ fn process_replacement<'a>(
     replacers: &[Box<dyn LinkTransformer>],
 ) -> anyhow::Result<Vec<Event<'a>>> {
     match event {
-        ref event @ Event::Start(Tag::Link(ref _item_type, ref destination, ref title)) => {
+        Event::Start(Tag::Link(ref _item_type, ref destination, ref title)) => {
             // Reset metadata
             let metadata = metadata.insert(LinkMetadata::default());
             // Record destination and title from start event
             metadata.destination = destination.to_string();
             metadata.title = Some(title.to_string());
             // Return unmodified start event
-            Ok(vec![event.clone()])
+            Ok(vec![event])
         }
         Event::Text(ref text) => {
             if let Some(metadata) = metadata {
@@ -56,7 +57,7 @@ fn process_replacement<'a>(
                 Ok(vec![])
             } else {
                 // If there is no metadata, pass through the event
-                Ok(vec![event.clone()])
+                Ok(vec![event])
             }
         }
         Event::Code(ref text) => {
@@ -67,7 +68,7 @@ fn process_replacement<'a>(
                 Ok(vec![])
             } else {
                 // If there is no metadata, pass through the event
-                Ok(vec![event.clone()])
+                Ok(vec![event])
             }
         }
         Event::End(Tag::Link(item_type, ref destination, ref title)) => {
@@ -92,7 +93,7 @@ fn process_replacement<'a>(
                 ))])
             }
         }
-        event => Ok(vec![event.clone()]),
+        event => Ok(vec![event]),
     }
 }
 

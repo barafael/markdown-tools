@@ -2,9 +2,7 @@ use anyhow::Context;
 use clap::Parser as ClapParser;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlang;
 use markdown_linkify::docsrs_replacer::Docsrs;
-use markdown_linkify::substitution::Substitution;
-use markdown_linkify::{linkify, LinkTransformer};
-use serde::{Deserialize, Serialize};
+use markdown_linkify::{linkify, LinkTransformer, Transformers};
 use std::path::PathBuf;
 use std::{fs, io::Write};
 
@@ -22,20 +20,8 @@ struct Arguments {
     output: Option<PathBuf>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Transformers {
-    regexes: Vec<Substitution>,
-}
-
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
-
-    /*
-    let example: Replacers = Replacers {
-        regexes: vec![RegexReplacer::example(), RegexReplacer::example()],
-    };
-    println!("{}", toml::to_string_pretty(&example).unwrap());
-    */
 
     let regex_replacers: Transformers =
         if let Ok(regex_replacers) = fs::read_to_string(&args.config) {

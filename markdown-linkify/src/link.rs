@@ -10,18 +10,18 @@ pub struct Link<'a> {
     pub text: Vec<Event<'a>>,
 }
 
-impl<'a> Link<'a> {
-    pub fn into_iter(mut self) -> IntoIter<Event<'a>> {
+impl<'a> IntoIterator for Link<'a> {
+    type Item = Event<'a>;
+
+    type IntoIter = IntoIter<Event<'a>>;
+
+    fn into_iter(mut self) -> Self::IntoIter {
         let start = Event::Start(Tag::Link(
             self.link_type,
             self.destination.clone(),
             self.title.clone(),
         ));
-        let end = Event::End(Tag::Link(
-            self.link_type,
-            self.destination.clone(),
-            self.title.clone(),
-        ));
+        let end = Event::End(Tag::Link(self.link_type, self.destination, self.title));
         self.text.insert(0, start);
         self.text.push(end);
         self.text.into_iter()

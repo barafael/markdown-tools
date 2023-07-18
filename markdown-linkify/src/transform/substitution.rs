@@ -32,8 +32,7 @@ impl LinkTransformer for Substitution {
     fn apply(&self, metadata: &mut crate::LinkMetadata) -> anyhow::Result<()> {
         let snippet = self
             .pattern
-            .replacen(&metadata.destination, self.limit, &self.replacement)
-            .clone();
+            .replacen(&metadata.destination, self.limit, &self.replacement);
         let text = if let Some(caps) = self.pattern.captures(&metadata.destination) {
             if let Some(text) = caps.name("text") {
                 text.as_str().to_string()
