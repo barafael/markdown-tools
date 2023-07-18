@@ -94,6 +94,24 @@ where
     }
 }
 
+pub trait LinkTools: Iterator {
+    fn aggregate_links<'a>(self) -> LinkAggregator<'a, Self>
+    where
+        Self: Sized;
+}
+
+impl<T: ?Sized> LinkTools for T
+where
+    T: Iterator,
+{
+    fn aggregate_links<'a>(self) -> LinkAggregator<'a, Self>
+    where
+        Self: Sized,
+    {
+        LinkAggregator::new(self.into_iter())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
