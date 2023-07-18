@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
                     }
                 }
                 in_code_block = true;
-                new_vec.push(event.clone());
+                new_vec.push(event);
             }
             Event::Text(text) if in_code_block => {
                 current_block = Some(text.to_string());

@@ -41,24 +41,24 @@ where
                     Aggregator::Text(link) => Some(Aggregation::Link(link)),
                 };
             };
-            match (&self.state, next.clone()) {
+            let state = std::mem::replace(&mut self.state, Aggregator::Empty);
+            match (state, next) {
                 (Aggregator::Empty, Event::Start(Tag::Link(link_type, destination, title))) => {
                     self.state = Aggregator::Start(link_type, destination, title);
                     continue;
                 }
                 (Aggregator::Empty, e) => break Some(Aggregation::Event(e)),
                 (Aggregator::Start(link_type, destination, title), e @ Event::Start(..)) => {
-                    let start =
-                        Event::Start(Tag::Link(*link_type, destination.clone(), title.clone()));
+                    let start = Event::Start(Tag::Link(link_type, destination, title));
                     let agg = Aggregation::Bag(vec![start, e]);
                     self.state = Aggregator::Empty;
                     break Some(agg);
                 }
                 (Aggregator::Start(link_type, destination, title), Event::End(Tag::Link(..))) => {
                     let result = Link {
-                        link_type: *link_type,
-                        destination: destination.clone(),
-                        title: title.clone(),
+                        link_type,
+                        destination,
+                        title,
                         text: vec![],
                     };
                     self.state = Aggregator::Empty;
@@ -69,24 +69,22 @@ where
                     e @ (Event::Text(..) | Event::Code(..)),
                 ) => {
                     let link = Link {
-                        link_type: *link_type,
-                        destination: destination.clone(),
-                        title: title.clone(),
+                        link_type,
+                        destination,
+                        title,
                         text: vec![e],
                     };
                     self.state = Aggregator::Text(link);
                     continue;
                 }
-                (Aggregator::Text(link), e @ (Event::Text(..) | Event::Code(..))) => {
-                    let mut new_text = link.clone();
-                    new_text.text.push(e);
-                    self.state = Aggregator::Text(new_text);
+                (Aggregator::Text(mut link), e @ (Event::Text(..) | Event::Code(..))) => {
+                    link.text.push(e);
+                    self.state = Aggregator::Text(link);
                     continue;
                 }
                 (Aggregator::Text(link), Event::End(Tag::Link(..))) => {
-                    let result = link.clone();
                     self.state = Aggregator::Empty;
-                    break Some(Aggregation::Link(result));
+                    break Some(Aggregation::Link(link));
                 }
                 (_state, event) => break Some(Aggregation::Event(event)),
             }
@@ -100,9 +98,9 @@ pub trait LinkTools: Iterator {
         Self: Sized;
 }
 
-impl<T: ?Sized> LinkTools for T
+impl<T> LinkTools for T
 where
-    T: Iterator,
+    T: Iterator + ?Sized,
 {
     fn aggregate_links<'a>(self) -> LinkAggregator<'a, Self>
     where

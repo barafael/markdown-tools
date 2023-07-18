@@ -21,11 +21,7 @@ impl<'a> IntoIterator for Link<'a> {
             self.destination.clone(),
             self.title.clone(),
         ));
-        let end = Event::End(Tag::Link(
-            self.link_type,
-            self.destination.clone(),
-            self.title.clone(),
-        ));
+        let end = Event::End(Tag::Link(self.link_type, self.destination, self.title));
         self.text.insert(0, start);
         self.text.push(end);
         self.text.into_iter()

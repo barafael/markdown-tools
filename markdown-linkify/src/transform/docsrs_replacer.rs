@@ -27,7 +27,7 @@ impl LinkTransformer for Docsrs {
             .to_string();
         let page = self
             .client
-            .get(url.clone())
+            .get(&url)
             .send()
             .with_context(|| format!("Failed to access {url}"))?;
         let doc = Document::from(
