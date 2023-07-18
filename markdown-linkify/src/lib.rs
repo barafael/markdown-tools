@@ -1,13 +1,13 @@
-pub mod aggregator;
-mod link;
-mod transform;
-
-use aggregator::Aggregation;
 pub use transform::*;
 
 use pulldown_cmark::{Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
 use serde::{Deserialize, Serialize};
+
+pub mod aggregator;
+mod link;
+pub mod linkify;
+mod transform;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct LinkMetadata {
@@ -94,38 +94,6 @@ fn process_replacement<'a>(
             }
         }
         event => Ok(vec![event.clone()]),
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct Linkify<'a, I> {
-    state: aggregator::Aggregator<'a>,
-    iter: I,
-}
-
-impl<'a, I> Iterator for Linkify<'a, I>
-where
-    I: Iterator<Item = Event<'a>>,
-{
-    type Item = Aggregation<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = self.iter.next();
-        if let Some(next) = next {
-            let aggregation = self.state.push(next);
-            aggregation
-        } else {
-            self.state.flush()
-        }
-    }
-}
-
-impl<'a, I> Linkify<'a, I> {
-    pub fn new(iter: I) -> Self {
-        Self {
-            iter,
-            state: aggregator::Aggregator::default(),
-        }
     }
 }
 
