@@ -123,10 +123,8 @@ mod test {
     fn aggregates_md() {
         let md = "# HEADING\n[simple](link \"right?\")\n## more heading";
         let parser = pulldown_cmark::Parser::new(md);
-
-        let linkify = LinkAggregator::new(parser);
-        linkify.for_each(|e| {
-            dbg!(e);
+        parser.aggregate_links().for_each(|elem| {
+            dbg!(elem);
         });
     }
 
@@ -135,8 +133,7 @@ mod test {
         let md = "[simple](link \"right?\")";
         let parser = Parser::new(md);
 
-        let linkify = LinkAggregator::new(parser);
-        for agg in linkify {
+        for agg in parser.aggregate_links() {
             let Aggregation::Link(link) = agg else {
                 continue;
             };
@@ -154,8 +151,7 @@ mod test {
         let md = "[``](thing \"titleee?\")";
         let parser = Parser::new(md);
 
-        let linkify = LinkAggregator::new(parser);
-        for agg in linkify {
+        for agg in parser.aggregate_links() {
             let Aggregation::Link(link) = agg else {
                 continue;
             };
@@ -171,8 +167,7 @@ mod test {
         let md = include_str!("../test.md");
         let parser = Parser::new(md);
 
-        let linkify = LinkAggregator::new(parser);
-        linkify.for_each(|elem| {
+        parser.aggregate_links().for_each(|elem| {
             dbg!(elem);
         });
     }
@@ -195,8 +190,7 @@ mod test {
         let parser = Parser::new(md);
         let mut parser2 = Parser::new(md);
 
-        let linkify = LinkAggregator::new(parser);
-        for agg in linkify {
+        for agg in parser.aggregate_links() {
             for elem in agg.into_iter() {
                 assert_eq!(Some(elem), parser2.next());
             }
