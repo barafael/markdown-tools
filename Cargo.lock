@@ -1553,6 +1553,8 @@ name = "snippet-extractor"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "assert_cmd",
+ "assert_fs",
  "clap",
  "pest",
  "pest_derive",

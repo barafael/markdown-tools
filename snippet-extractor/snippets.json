@@ -1,20 +1,20 @@
 {
+  "main": {
+    "content": "fn main() -> anyhow::Result<()> {\r\n    // Read the Markdown file from disk\r\n    let input = fs::read_to_string(\"example.md\").unwrap();\r\n\r\n    // Parse the Markdown input into events\r\n    let parser = Parser::new(&input);\r\n\r\n    // Iterate over the events and process code blocks\r\n    let mut in_code_block = false;\r\n    ",
+    "file": "\\\\?\\C:\\Users\\rbachmann\\markdown-tools\\snippet-extractor\\tests\\rust_files\\more\\main.rs",
+    "line": 11,
+    "col": 1
+  },
   "peaches": {
-    "content": "let a = 4;\nlet a = 5;\n",
-    "file": "/home/rafael/markdown-snippet-inserter/snippet-extractor/testdir/parser.rs",
+    "content": "let a = 4;\r\nlet a = 5;\r\n",
+    "file": "\\\\?\\C:\\Users\\rbachmann\\markdown-tools\\snippet-extractor\\tests\\rust_files\\parser.rs",
     "line": 17,
     "col": 1
   },
   "test1": {
-    "content": "marker marker marker\n",
-    "file": "/home/rafael/markdown-snippet-inserter/snippet-extractor/testdir/testdir2/main copy.rs2",
+    "content": "marker marker marker\r\n",
+    "file": "\\\\?\\C:\\Users\\rbachmann\\markdown-tools\\snippet-extractor\\tests\\rust_files\\more\\main copy.rs2",
     "line": 47,
-    "col": 1
-  },
-  "main": {
-    "content": "fn main() -> anyhow::Result<()> {\n    // Read the Markdown file from disk\n    let input = fs::read_to_string(\"example.md\").unwrap();\n\n    // Parse the Markdown input into events\n    let parser = Parser::new(&input);\n\n    // Iterate over the events and process code blocks\n    let mut in_code_block = false;\n",
-    "file": "/home/rafael/markdown-snippet-inserter/snippet-extractor/testdir/testdir2/main.rs2",
-    "line": 11,
     "col": 1
   }
 }
