@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::LinkMetadata;
+use crate::link::Link;
 
 use self::substitution::Substitution;
 
@@ -12,7 +12,7 @@ pub mod docsrs_replacer;
 pub mod substitution;
 
 pub trait LinkTransformer: Debug {
-    fn apply(&self, metadata: &mut LinkMetadata) -> anyhow::Result<()>;
+    fn apply(&self, link: &mut Link) -> anyhow::Result<()>;
     fn pattern(&self) -> Regex;
 }
 

@@ -1,8 +1,9 @@
 use anyhow::Context;
+use pulldown_cmark::Event;
 use regex::Regex;
 use tempfile::TempDir;
 
-use crate::{LinkMetadata, LinkTransformer};
+use crate::{link::Link, LinkTransformer};
 
 #[derive(Debug, Clone, Default)]
 pub struct DocsRustlang {
@@ -17,14 +18,14 @@ impl DocsRustlang {
 
 impl LinkTransformer for DocsRustlang {
     fn pattern(&self) -> Regex {
-        Regex::new(r"rust:(?<i>.+)").unwrap()
+        Regex::new(r"rust:(?<i>.+)").expect("Invalid regex")
     }
 
-    fn apply(&self, meta: &mut LinkMetadata) -> anyhow::Result<()> {
+    fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         // Extract item name
         let snippet = self
             .pattern()
-            .replacen(&meta.destination, 1, "$i")
+            .replacen(&link.destination, 1, "$i")
             .to_string();
         // Create temporary directory with rust file using our item in the docs
         let tmp_dir = TempDir::new()?;
@@ -51,19 +52,18 @@ impl LinkTransformer for DocsRustlang {
 
         // Find URL in generated html
         let regex = Regex::new(r#"(?<l>https://doc.rust-lang.org/[^"]+)""#).expect("Invalid regex");
-        let (_full, [link]) = regex
-            .captures(html.as_str())
+        let (_full, [url]) = regex
+            .captures(&html)
             .with_context(|| format!("No captures found for {snippet}"))?
             .extract();
 
-        if meta.title.is_none() || meta.title == Some(String::new()) {
-            meta.title = Some(link.to_string());
+        link.destination = url.to_string().into();
+        if link.title.is_empty() {
+            link.title = url.to_string().into();
         }
-        if meta.text.is_none() || meta.text == Some(String::new()) {
-            meta.text = Some(snippet);
+        if link.text.is_empty() {
+            link.text = vec![Event::Text(snippet.into())];
         }
-        meta.destination = link.to_string();
-        meta.is_code = true;
         Ok(())
     }
 }

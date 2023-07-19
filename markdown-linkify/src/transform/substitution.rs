@@ -1,7 +1,8 @@
+use pulldown_cmark::Event;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::LinkTransformer;
+use crate::{link::Link, LinkTransformer};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Substitution {
@@ -29,11 +30,11 @@ impl LinkTransformer for Substitution {
         self.pattern.clone()
     }
 
-    fn apply(&self, metadata: &mut crate::LinkMetadata) -> anyhow::Result<()> {
-        let snippet = self
+    fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
+        let snippet = &self
             .pattern
-            .replacen(&metadata.destination, self.limit, &self.replacement);
-        let text = if let Some(caps) = self.pattern.captures(&metadata.destination) {
+            .replacen(&link.destination, self.limit, &self.replacement);
+        let text = if let Some(caps) = self.pattern.captures(&link.destination) {
             if let Some(text) = caps.name("text") {
                 text.as_str().to_string()
             } else {
@@ -42,14 +43,13 @@ impl LinkTransformer for Substitution {
         } else {
             snippet.to_string()
         };
-        metadata.destination = snippet.to_string();
-        if metadata.text.is_none() {
-            metadata.text = Some(text);
+        link.destination = snippet.to_string().into();
+        if link.text.is_empty() {
+            link.text = vec![Event::Text(text.into())];
         }
-        if metadata.title.is_none() || metadata.title == Some(String::new()) {
-            metadata.title = Some(metadata.destination.clone());
+        if link.title.is_empty() {
+            link.title = link.destination.clone();
         }
-        metadata.is_code = self.code;
         Ok(())
     }
 }

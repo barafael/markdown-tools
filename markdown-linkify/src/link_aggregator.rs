@@ -141,7 +141,7 @@ mod test {
             assert_eq!(link.link_type, LinkType::Inline);
             return;
         }
-        assert!(false);
+        panic!("Should return above");
     }
 
     #[test]
@@ -161,20 +161,10 @@ mod test {
     }
 
     #[test]
-    fn aggregates_test_file() {
-        let md = include_str!("../test.md");
-        let parser = Parser::new(md);
-
-        parser.aggregate_links().for_each(|elem| {
-            dbg!(elem);
-        });
-    }
-
-    #[test]
     fn broken_link_callback() {
-        fn callback<'a>(link: BrokenLink<'a>) -> Option<(CowStr<'a>, CowStr<'a>)> {
+        fn callback(link: BrokenLink) -> Option<(CowStr, CowStr)> {
             dbg!(&link);
-            Some(("".into(), link.reference.into()))
+            Some(("".into(), link.reference))
         }
         let md = "[foo]";
         let cb = &mut callback;
@@ -193,5 +183,13 @@ mod test {
                 assert_eq!(Some(elem), parser2.next());
             }
         }
+    }
+
+    #[test]
+    fn empty_links() {
+        let md = "[]()";
+        let mut links = Parser::new(md).aggregate_links();
+        let agg = links.nth(1).unwrap();
+        dbg!(agg);
     }
 }

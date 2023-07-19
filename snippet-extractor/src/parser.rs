@@ -20,15 +20,13 @@ let a = 5;
 "#;
         let pair = SnippetParser::parse(super::Rule::File, text)
             .unwrap()
-            .into_iter()
             .next()
             .unwrap()
             .into_inner()
-            .into_iter()
             .next()
             .unwrap();
         assert_eq!(pair.as_rule(), Rule::Snippet);
-        let mut snippet = pair.into_inner().into_iter();
+        let mut snippet = pair.into_inner();
         let identifier = snippet.next().unwrap().as_str();
         let snippet_text = snippet.next().unwrap().as_str();
         assert_eq!(identifier, "peaches");

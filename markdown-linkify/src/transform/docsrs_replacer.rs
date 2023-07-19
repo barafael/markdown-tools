@@ -1,5 +1,7 @@
-use crate::{LinkMetadata, LinkTransformer};
+use crate::link::Link;
+use crate::LinkTransformer;
 use anyhow::Context;
+use pulldown_cmark::Event;
 use regex::Regex;
 use select::document::Document;
 use select::predicate::Name;
@@ -17,13 +19,13 @@ impl Docsrs {
 
 impl LinkTransformer for Docsrs {
     fn pattern(&self) -> Regex {
-        Regex::new(r"docsrs:(?<i>.+)").unwrap()
+        Regex::new(r"docsrs:(?<i>.+)").expect("Invalid regex")
     }
 
-    fn apply(&self, meta: &mut LinkMetadata) -> anyhow::Result<()> {
+    fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         let url = self
             .pattern()
-            .replacen(&meta.destination, 1, "$i")
+            .replacen(&link.destination, 1, "$i")
             .to_string();
         let page = self
             .client
@@ -49,12 +51,11 @@ impl LinkTransformer for Docsrs {
             .context("Can't split first word of title")?
             .to_string();
 
-        if meta.title.is_none() || meta.title == Some(String::new()) {
-            meta.title = Some(url.to_string());
+        link.destination = url.to_string().into();
+        if link.title.is_empty() {
+            link.title = url.into();
         }
-        meta.text = Some(name);
-        meta.destination = url.to_string();
-        meta.is_code = true;
+        link.text = vec![Event::Text(name.into())];
         Ok(())
     }
 }
