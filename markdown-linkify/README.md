@@ -8,7 +8,8 @@
 * [ ] org-mode frontend for agnostic replacers
 * [ ] local rustdoc replacer
 * [ ] collect replacer ideas, github issue replacer?
-* [ ] unit tests for replacers, linkify
+* [x] unit tests for replacers, linkify
 * [ ] documentation
-* [ ] support composite text events
-* [ ] implement LinkMetadata as iterator
+* [x] support composite text events
+* [x] implement LinkMetadata as iterator
+* [ ] figure out how to publish linkify on crates.io
