@@ -1,5 +1,9 @@
 # Test File
 
+some other rust stuff about [rust:Vec]
+
+some other rust stuff about [rust:std::vec::Vec]
+
 [some text, random](PS-129 "some title")
 
 [`test`](PS-129)

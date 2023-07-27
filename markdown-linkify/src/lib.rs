@@ -7,8 +7,8 @@ use pulldown_cmark_to_cmark::cmark;
 
 use crate::aggregation::Aggregation;
 
-mod aggregation;
-mod link;
+pub mod aggregation;
+pub mod link;
 pub mod link_aggregator;
 mod transform;
 

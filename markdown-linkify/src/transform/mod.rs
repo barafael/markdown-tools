@@ -13,7 +13,11 @@ pub mod substitution;
 
 pub trait LinkTransformer: Debug {
     fn apply(&self, link: &mut Link) -> anyhow::Result<()>;
-    fn pattern(&self) -> Regex;
+    // TODO should return &'str probably
+    fn tag(&self) -> String;
+    fn pattern(&self) -> Regex {
+        Regex::new(format!("{}(?<i>.+)", self.tag()).as_str()).expect("Invalid regex")
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

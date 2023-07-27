@@ -7,7 +7,8 @@ use crate::{link::Link, LinkTransformer};
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Substitution {
     #[serde(with = "serde_regex")]
-    pattern: Regex,
+    tail: Regex,
+    tag: String,
     replacement: String,
     limit: usize,
     #[serde(default)]
@@ -17,7 +18,8 @@ pub struct Substitution {
 impl Substitution {
     pub fn example() -> Self {
         Self {
-            pattern: regex::Regex::new(r"PS-(?<s>\d+)").expect("Invalid example regex"),
+            tail: regex::Regex::new(r"(?<s>\d+)").expect("Invalid example regex"),
+            tag: String::from("PS-"),
             replacement: "jira.com/issues/PS-$s".to_string(),
             limit: 3,
             code: false,
@@ -26,15 +28,19 @@ impl Substitution {
 }
 
 impl LinkTransformer for Substitution {
+    fn tag(&self) -> String {
+        self.tag.clone()
+    }
+
     fn pattern(&self) -> Regex {
-        self.pattern.clone()
+        Regex::new(format!("(?<text>{}{})", self.tag(), self.tail).as_str()).expect("Invalid regex")
     }
 
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         let snippet = &self
-            .pattern
+            .pattern()
             .replacen(&link.destination, self.limit, &self.replacement);
-        let text = if let Some(caps) = self.pattern.captures(&link.destination) {
+        let text = if let Some(caps) = self.tail.captures(&link.destination) {
             if let Some(text) = caps.name("text") {
                 text.as_str().to_string()
             } else {

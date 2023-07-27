@@ -1,10 +1,12 @@
 [[regexes]]
-pattern = '(?<text>PS-\d+)'
+tag = 'PS-'
+tail = '\d+'
 replacement = "https://www.jira.com/$text"
 limit = 1
 
 [[regexes]]
-pattern = '(?<text>GTPR-\d+)'
+tag = 'GTPR-'
+tail = '\d+'
 replacement = "http://www.grtp.de/issue/$text"
 limit = 0
 code = true

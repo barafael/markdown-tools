@@ -116,6 +116,7 @@ mod test {
 
     use crate::aggregation::Aggregation;
     use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Options, Parser};
+    use pulldown_cmark_to_cmark::cmark;
 
     #[test]
     fn aggregates_md() {
@@ -163,13 +164,15 @@ mod test {
     #[test]
     fn broken_link_callback() {
         fn callback(link: BrokenLink) -> Option<(CowStr, CowStr)> {
-            dbg!(&link);
-            Some(("".into(), link.reference))
+            Some(("destination".into(), link.reference))
         }
-        let md = "[foo]";
+        let md = "[foo `this` works `nicely`]";
         let cb = &mut callback;
         let parser = Parser::new_with_broken_link_callback(md, Options::empty(), Some(cb));
-        parser.for_each(drop);
+
+        let mut buf = String::new();
+        let _state = cmark(parser, &mut buf).unwrap();
+        println!("{buf}");
     }
 
     #[test]
@@ -187,9 +190,10 @@ mod test {
 
     #[test]
     fn empty_links() {
-        let md = "[]()";
-        let mut links = Parser::new(md).aggregate_links();
-        let agg = links.nth(1).unwrap();
-        dbg!(agg);
+        let md = "[foo]\n# HEADING\n[foo]: /url \"title\"\n\n[foo]";
+        let links = Parser::new(md).aggregate_links();
+        links.for_each(|elem| {
+            dbg!(elem);
+        });
     }
 }

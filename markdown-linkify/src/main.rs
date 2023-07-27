@@ -1,10 +1,57 @@
 use anyhow::Context;
 use clap::Parser as ClapParser;
+use markdown_linkify::aggregation::Aggregation;
 use markdown_linkify::docs_rustlang_replacer::DocsRustlang;
 use markdown_linkify::docsrs_replacer::Docsrs;
+use markdown_linkify::link_aggregator::LinkTools;
 use markdown_linkify::{linkify, LinkTransformer, Transformers};
+use pulldown_cmark::{BrokenLink, Event};
+use pulldown_cmark_to_cmark::cmark;
 use std::path::PathBuf;
 use std::{fs, io::Write};
+
+use pulldown_cmark::{Options, Parser};
+
+pub fn links<'a>(input: &'a str, replacers: &[Box<dyn LinkTransformer>]) -> anyhow::Result<String> {
+    let mut cb = |link: BrokenLink<'a>| {
+        for replacer in replacers {
+            if replacer.pattern().is_match(&link.reference) {
+                let mut link = markdown_linkify::link::Link {
+                    link_type: link.link_type,
+                    destination: link.reference,
+                    title: "".into(),
+                    text: vec![],
+                };
+                replacer.apply(&mut link).unwrap();
+                return Some((link.destination, link.title));
+            }
+        }
+        None
+    };
+    let parser = Parser::new_with_broken_link_callback(input, Options::empty(), Some(&mut cb));
+    let parser = parser
+        .aggregate_links()
+        .flat_map(|mut aggregation| {
+            let Aggregation::Link(ref mut link) = aggregation else {
+                return anyhow::Ok(aggregation);
+            };
+            let Some(Event::Text(first)) = link.text.get_mut(0) else {
+                return Ok(aggregation);
+            };
+            for replacer in replacers {
+                if first.starts_with(&replacer.tag()) {
+                    let new_text = first.replace(&replacer.tag(), "");
+                    *first = new_text.into();
+                    return Ok(Aggregation::Link(link.clone()));
+                }
+            }
+            Ok(aggregation)
+        })
+        .flatten();
+    let mut buf = String::with_capacity(input.len());
+    let _state = cmark(parser, &mut buf)?;
+    Ok(buf)
+}
 
 #[derive(Debug, Clone, ClapParser)]
 struct Arguments {
@@ -41,7 +88,9 @@ fn main() -> anyhow::Result<()> {
     let input = fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {:?}", args.input))?;
 
-    let buf = linkify(&input, &replacers)?;
+    let buf = links(&input, &replacers).unwrap();
+    let buf = linkify(&buf, &replacers)?;
+
     if let Some(path) = &args.output {
         std::fs::write(path, buf)
             .with_context(|| format!("Failed to write output file: {:?}", args.output))?;

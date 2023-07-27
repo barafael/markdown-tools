@@ -2,7 +2,6 @@ use crate::link::Link;
 use crate::LinkTransformer;
 use anyhow::Context;
 use pulldown_cmark::Event;
-use regex::Regex;
 use select::document::Document;
 use select::predicate::Name;
 
@@ -18,8 +17,8 @@ impl Docsrs {
 }
 
 impl LinkTransformer for Docsrs {
-    fn pattern(&self) -> Regex {
-        Regex::new(r"docsrs:(?<i>.+)").expect("Invalid regex")
+    fn tag(&self) -> String {
+        String::from("docsrs:")
     }
 
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {

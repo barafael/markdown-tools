@@ -17,8 +17,8 @@ impl DocsRustlang {
 }
 
 impl LinkTransformer for DocsRustlang {
-    fn pattern(&self) -> Regex {
-        Regex::new(r"rust:(?<i>.+)").expect("Invalid regex")
+    fn tag(&self) -> String {
+        String::from("rust:")
     }
 
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
@@ -34,6 +34,15 @@ impl LinkTransformer for DocsRustlang {
 
         // Invoke rustdoc for creating our docs
         let output = std::process::Command::new("rustdoc")
+            .arg("-Z")
+            .arg("unstable-options")
+            .arg("--extern-html-root-url")
+            .arg("core=https://doc.rust-lang.org/stable/")
+            .arg("--extern-html-root-url")
+            .arg("alloc=https://doc.rust-lang.org/stable/")
+            .arg("--extern-html-root-url")
+            .arg("std=https://doc.rust-lang.org/stable/")
+            .arg("--extern-html-root-takes-precedence")
             .arg("--out-dir")
             .arg(tmp_dir.path())
             .arg(test_file_path)

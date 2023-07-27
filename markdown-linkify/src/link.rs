@@ -1,4 +1,4 @@
-use std::vec::IntoIter;
+pub(crate) use std::vec::IntoIter;
 
 use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 
