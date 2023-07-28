@@ -19,6 +19,9 @@ struct Arguments {
     #[arg(short, long, default_value = "linkify.toml")]
     config: PathBuf,
 
+    #[arg(short, long)]
+    example: bool,
+
     /// The output file, or stdout if not specified.
     #[arg(short, long)]
     output: Option<PathBuf>,
@@ -26,6 +29,13 @@ struct Arguments {
 
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
+
+    if args.example {
+        let example = Transformers::example();
+        let example = toml::to_string_pretty(&example)?;
+        std::fs::write(&args.config, example)?;
+        return Ok(());
+    }
 
     let regex_replacers: Transformers =
         if let Ok(regex_replacers) = fs::read_to_string(&args.config) {
