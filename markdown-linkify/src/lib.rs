@@ -2,8 +2,7 @@ use link::Link;
 use link_aggregator::LinkTools;
 pub use transform::*;
 
-use pulldown_cmark::Parser;
-use pulldown_cmark_to_cmark::cmark;
+use pulldown_cmark::Event;
 
 use crate::aggregation::Aggregation;
 
@@ -12,10 +11,11 @@ pub mod link;
 pub mod link_aggregator;
 mod transform;
 
-pub fn linkify(input: &str, replacers: &[Box<dyn LinkTransformer>]) -> anyhow::Result<String> {
-    let parser = Parser::new(input);
-
-    let i = parser
+pub fn linkify<'a>(
+    input: impl Iterator<Item = Event<'a>>,
+    replacers: &'a [Box<dyn LinkTransformer>],
+) -> impl Iterator<Item = Event<'a>> {
+    input
         .aggregate_links()
         .flat_map(|aggregation| {
             let Aggregation::Link(mut link) = aggregation else {
@@ -24,11 +24,7 @@ pub fn linkify(input: &str, replacers: &[Box<dyn LinkTransformer>]) -> anyhow::R
             process_replacement(&mut link, replacers)?;
             Ok(Aggregation::Link(link))
         })
-        .flatten();
-
-    let mut buf = String::with_capacity(input.len());
-    let _state = cmark(i, &mut buf)?;
-    Ok(buf)
+        .flatten()
 }
 
 fn process_replacement(

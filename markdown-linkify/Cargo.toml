@@ -11,6 +11,7 @@ predicates = "3.0.3"
 [dependencies]
 anyhow = "1.0.72"
 clap = { version = "4.3.16", features = ["derive"] }
+dyn-clone = "1.0.12"
 pulldown-cmark = "0.9.3"
 pulldown-cmark-to-cmark = "10.0.4"
 regex = { version = "1.9.1" }

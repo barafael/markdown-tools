@@ -5,16 +5,18 @@ use markdown_linkify::docs_rustlang_replacer::DocsRustlang;
 use markdown_linkify::docsrs_replacer::Docsrs;
 use markdown_linkify::link_aggregator::LinkTools;
 use markdown_linkify::{linkify, LinkTransformer, Transformers};
-use pulldown_cmark::{BrokenLink, Event};
+use pulldown_cmark::{BrokenLink, CowStr, Event};
 use pulldown_cmark_to_cmark::cmark;
 use std::path::PathBuf;
 use std::{fs, io::Write};
 
 use pulldown_cmark::{Options, Parser};
 
-pub fn links<'a>(input: &'a str, replacers: &[Box<dyn LinkTransformer>]) -> anyhow::Result<String> {
-    let mut cb = |link: BrokenLink<'a>| {
-        for replacer in replacers {
+pub fn create_callback<'a>(
+    replacers: Vec<Box<dyn LinkTransformer>>,
+) -> impl Fn(BrokenLink<'a>) -> Option<(CowStr<'a>, CowStr<'a>)> {
+    move |link: BrokenLink<'a>| {
+        for replacer in &replacers {
             if replacer.pattern().is_match(&link.reference) {
                 let mut link = markdown_linkify::link::Link {
                     link_type: link.link_type,
@@ -27,30 +29,31 @@ pub fn links<'a>(input: &'a str, replacers: &[Box<dyn LinkTransformer>]) -> anyh
             }
         }
         None
-    };
-    let parser = Parser::new_with_broken_link_callback(input, Options::empty(), Some(&mut cb));
-    let parser = parser
-        .aggregate_links()
-        .flat_map(|mut aggregation| {
-            let Aggregation::Link(ref mut link) = aggregation else {
-                return anyhow::Ok(aggregation);
-            };
-            let Some(Event::Text(first)) = link.text.get_mut(0) else {
-                return Ok(aggregation);
-            };
-            for replacer in replacers {
-                if first.starts_with(&replacer.tag()) {
-                    let new_text = first.replace(&replacer.tag(), "");
-                    *first = new_text.into();
-                    return Ok(Aggregation::Link(link.clone()));
-                }
+    }
+}
+
+pub fn links<'a>(
+    input: &'a str,
+    replacers: Vec<Box<dyn LinkTransformer>>,
+    cb: &'a mut impl Fn(BrokenLink<'a>) -> Option<(CowStr<'a>, CowStr<'a>)>,
+) -> impl Iterator<Item = Event<'a>> {
+    let parser = Parser::new_with_broken_link_callback(input, Options::empty(), Some(cb));
+    parser.aggregate_links().flat_map(move |mut aggregation| {
+        let Aggregation::Link(ref mut link) = aggregation else {
+            return aggregation;
+        };
+        let Some(Event::Text(first)) = link.text.get_mut(0) else {
+            return aggregation;
+        };
+        for replacer in &replacers {
+            if first.starts_with(&replacer.tag()) {
+                let new_text = first.replace(&replacer.tag(), "");
+                *first = new_text.into();
+                return Aggregation::Link(link.clone());
             }
-            Ok(aggregation)
-        })
-        .flatten();
-    let mut buf = String::with_capacity(input.len());
-    let _state = cmark(parser, &mut buf)?;
-    Ok(buf)
+        }
+        aggregation
+    })
 }
 
 #[derive(Debug, Clone, ClapParser)]
@@ -88,8 +91,12 @@ fn main() -> anyhow::Result<()> {
     let input = fs::read_to_string(&args.input)
         .with_context(|| format!("Failed to read input file: {:?}", args.input))?;
 
-    let buf = links(&input, &replacers).unwrap();
-    let buf = linkify(&buf, &replacers)?;
+    let cb = Box::leak(Box::new(create_callback(replacers.clone())));
+    let iterator = links(&input, replacers.clone(), cb);
+    let iterator = linkify(iterator, &replacers);
+
+    let mut buf = String::with_capacity(input.len());
+    let _state = cmark(iterator, &mut buf)?;
 
     if let Some(path) = &args.output {
         std::fs::write(path, buf)
