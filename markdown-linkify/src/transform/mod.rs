@@ -30,7 +30,7 @@ pub struct Transformers {
 impl Transformers {
     pub fn example() -> Self {
         Self {
-            regexes: vec![Substitution::example(), Substitution::example()],
+            regexes: vec![Substitution::example()],
         }
     }
 }
