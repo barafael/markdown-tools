@@ -21,6 +21,7 @@ impl LinkTransformer for Docsrs {
         String::from("docsrs:")
     }
 
+    /// Access the constructed page, then get its html title.
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         let url = self
             .pattern()

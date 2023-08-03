@@ -21,6 +21,9 @@ impl LinkTransformer for DocsRustlang {
         String::from("rust:")
     }
 
+    /// Generate a barebones rust project with our input text in a doc comment,
+    /// run rustdoc on it,
+    /// parse out the result link from the generated html.
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         // Extract item name
         let snippet = self

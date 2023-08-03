@@ -8,6 +8,7 @@ use markdown_linkify::{
 };
 use pulldown_cmark_to_cmark::cmark;
 use std::path::PathBuf;
+
 use std::{fs, io::Write};
 
 #[derive(Debug, Clone, ClapParser)]
@@ -19,6 +20,8 @@ struct Arguments {
     #[arg(short, long, default_value = "linkify.toml")]
     config: PathBuf,
 
+    /// Write example configuration file?
+    /// No further action is taken.
     #[arg(short, long)]
     example: bool,
 
@@ -37,15 +40,17 @@ fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let regex_replacers: Transformers =
-        if let Ok(regex_replacers) = fs::read_to_string(&args.config) {
-            toml::from_str(&regex_replacers)?
-        } else {
-            Transformers { regexes: vec![] }
-        };
+    let regex_replacers: Transformers = toml::from_str(
+        fs::read_to_string(&args.config)
+            .context("Failed to read transformer config file")?
+            .as_str(),
+    )
+    .context("Failed to deserialize toml config file")?;
 
+    // Create a vector with `LinkTransformer` trait objects.
+    // Some of which are read in from the config file.
+    // Others are added hard-coded, such as the rustdoc and docs.rs replacers.
     let mut replacers: Vec<Box<dyn LinkTransformer>> = Vec::new();
-
     for replacer in regex_replacers.regexes {
         replacers.push(Box::new(replacer));
     }
@@ -58,6 +63,8 @@ fn main() -> anyhow::Result<()> {
     let cb = Box::leak(Box::new(broken_link_callback_with_replacers(
         replacers.clone(),
     )));
+    
+    // Enrich broken links with references, then 
     let iterator = process_broken_links(&input, replacers.clone(), cb);
     let iterator = process_links(iterator, &replacers);
 

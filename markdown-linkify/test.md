@@ -10,6 +10,8 @@ some other rust stuff about [rust:std::vec::Vec]
 
 [](GTPR-12355)
 
+[GTPR-12355]
+
 in a paragraph with text [`hello`](empty) yay!
 
 some rust stuff is here [](rust:String) uaaau!

@@ -35,13 +35,16 @@ pub fn process_broken_links<'a>(
     replacers: Vec<Box<dyn LinkTransformer>>,
     cb: &'a mut impl Fn(BrokenLink<'a>) -> Option<(CowStr<'a>, CowStr<'a>)>,
 ) -> impl Iterator<Item = Event<'a>> {
+    // Add missing references via the broken link callback (the replacers are registered there).
     let parser = Parser::new_with_broken_link_callback(input, Options::empty(), Some(cb));
 
-    // transform `rust:Vec` to `Vec`
+    // transform `rust:Vec` to `Vec` (remove the tag text, if present).
     parser.aggregate_links().flat_map(move |mut aggregation| {
+        // return links untouched.
         let Aggregation::Link(ref mut link) = aggregation else {
             return aggregation;
         };
+        // return empty text and code events untouched.
         let Some(Event::Text(first)) = link.text.get_mut(0) else {
             return aggregation;
         };

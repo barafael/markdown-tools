@@ -2,6 +2,9 @@ pub(crate) use std::vec::IntoIter;
 
 use pulldown_cmark::{CowStr, Event, LinkType, Tag};
 
+/// A link with items as represented by [`pulldown_cmark::Event`].
+/// Except, instead of separate events, this is one complete datastructure
+/// suitable to run a replacer on.
 #[derive(Debug, Clone)]
 pub struct Link<'a> {
     pub link_type: LinkType,

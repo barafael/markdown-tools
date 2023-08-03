@@ -1,7 +1,15 @@
-use crate::aggregation::{Aggregation, Aggregator};
+use crate::aggregation::Aggregation;
 use crate::link::Link;
 
-use pulldown_cmark::{Event, Tag};
+use pulldown_cmark::{CowStr, Event, LinkType, Tag};
+
+#[derive(Debug, Default)]
+pub enum Aggregator<'a> {
+    #[default]
+    Empty,
+    Start(LinkType, CowStr<'a>, CowStr<'a>),
+    Text(Link<'a>),
+}
 
 #[derive(Debug, Default)]
 pub struct LinkAggregator<'a, I> {
@@ -18,6 +26,10 @@ impl<'a, I> LinkAggregator<'a, I> {
     }
 }
 
+/// Walk over an iterator of [`Event`]s.
+/// On encountering a start of a link, then some text, then an end of a link:
+/// pass on an aggregation of the encountered link.
+/// Otherwise, pass on all items.
 impl<'a, I> Iterator for LinkAggregator<'a, I>
 where
     I: Iterator<Item = Event<'a>>,

@@ -27,6 +27,7 @@ impl Substitution {
     }
 }
 
+/// A [`Substitution`] is a link transformer of sorts, too.
 impl LinkTransformer for Substitution {
     fn tag(&self) -> String {
         self.tag.clone()
@@ -36,6 +37,7 @@ impl LinkTransformer for Substitution {
         Regex::new(format!("(?<text>{}{})", self.tag(), self.tail).as_str()).expect("Invalid regex")
     }
 
+    /// Perform the replacement.
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         let snippet = &self
             .pattern()

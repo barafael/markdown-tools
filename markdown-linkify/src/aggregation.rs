@@ -24,11 +24,3 @@ impl<'a> IntoIterator for Aggregation<'a> {
         }
     }
 }
-
-#[derive(Debug, Default)]
-pub enum Aggregator<'a> {
-    #[default]
-    Empty,
-    Start(LinkType, CowStr<'a>, CowStr<'a>),
-    Text(Link<'a>),
-}
