@@ -37,6 +37,10 @@ impl LinkTransformer for Substitution {
         Regex::new(format!("(?<text>{}{})", self.tag(), self.tail).as_str()).expect("Invalid regex")
     }
 
+    fn strip_tag(&self) -> bool {
+        false
+    }
+
     /// Perform the replacement.
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
         let snippet = &self

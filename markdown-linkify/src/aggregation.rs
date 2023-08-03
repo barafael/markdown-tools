@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
 
-use pulldown_cmark::{CowStr, Event, LinkType};
+use pulldown_cmark::Event;
 
 use crate::link::Link;
 

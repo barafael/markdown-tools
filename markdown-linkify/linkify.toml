@@ -3,6 +3,7 @@ tag = 'PS-'
 tail = '\d+'
 replacement = "https://www.jira.com/$text"
 limit = 1
+strip_tag = false
 
 [[regexes]]
 tag = 'GTPR-'
@@ -10,3 +11,4 @@ tail = '\d+'
 replacement = "http://www.grtp.de/issue/$text"
 limit = 0
 code = true
+strip_tag = false

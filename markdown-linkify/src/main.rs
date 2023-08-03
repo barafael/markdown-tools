@@ -63,8 +63,8 @@ fn main() -> anyhow::Result<()> {
     let cb = Box::leak(Box::new(broken_link_callback_with_replacers(
         replacers.clone(),
     )));
-    
-    // Enrich broken links with references, then 
+
+    // Enrich broken links with references, then
     let iterator = process_broken_links(&input, replacers.clone(), cb);
     let iterator = process_links(iterator, &replacers);
 

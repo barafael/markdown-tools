@@ -23,6 +23,10 @@ pub trait LinkTransformer: Debug + dyn_clone::DynClone {
     fn pattern(&self) -> Regex {
         Regex::new(format!("{}(?<i>.+)", self.tag()).as_str()).expect("Invalid regex")
     }
+
+    fn strip_tag(&self) -> bool {
+        true
+    }
 }
 
 dyn_clone::clone_trait_object!(LinkTransformer);

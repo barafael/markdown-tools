@@ -49,6 +49,9 @@ pub fn process_broken_links<'a>(
             return aggregation;
         };
         for replacer in &replacers {
+            if !replacer.strip_tag() {
+                continue;
+            }
             if first.starts_with(&replacer.tag()) {
                 let new_text = first.replace(&replacer.tag(), "");
                 *first = new_text.into();
