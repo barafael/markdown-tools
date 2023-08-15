@@ -1,4 +1,4 @@
-use pulldown_cmark::Event;
+use pulldown_cmark::{Event, LinkType};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
@@ -43,6 +43,9 @@ impl LinkTransformer for Substitution {
 
     /// Perform the replacement.
     fn apply(&self, link: &mut Link) -> anyhow::Result<()> {
+        if link.link_type == LinkType::ShortcutUnknown {
+            return Ok(());
+        }
         let snippet = &self
             .pattern()
             .replacen(&link.destination, self.limit, &self.replacement);
