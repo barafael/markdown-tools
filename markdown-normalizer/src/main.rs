@@ -11,6 +11,9 @@ struct Arguments {
 
     #[arg(short, long)]
     output: Option<PathBuf>,
+
+    #[arg(short, default_value_t = false)]
+    dump: bool,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -18,7 +21,11 @@ fn main() -> anyhow::Result<()> {
 
     let input = fs::read_to_string(args.markdown_file).unwrap();
 
-    let mut parser = Parser::new(&input);
+    let mut parser = Parser::new(&input).inspect(|elem| {
+        if args.dump {
+            dbg!(elem);
+        }
+    });
 
     let mut buf = String::with_capacity(input.len());
     let _state = cmark(&mut parser, &mut buf)?;

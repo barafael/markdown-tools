@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "codeblock-button-inserter",
     "markdown-normalizer",
     "markdown-snippet-inserter",
     "snippet-extractor",
