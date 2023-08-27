@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "markdown-linkify",
     "markdown-normalizer",
     "markdown-snippet-inserter",
     "snippet-extractor",
