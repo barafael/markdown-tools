@@ -16,12 +16,13 @@ pub struct Substitution {
     code: bool,
 }
 
-/// Workaround for https://github.com/serde-rs/serde/issues/368
-fn one() -> usize {
+/// Workaround for <https://github.com/serde-rs/serde/issues/368>
+const fn one() -> usize {
     1
 }
 
 impl Substitution {
+    #[must_use]
     pub fn example() -> Self {
         Self {
             tail: regex::Regex::new(r"\d+").expect("Invalid example regex"),
@@ -55,12 +56,12 @@ impl LinkTransformer for Substitution {
         let snippet = &self
             .pattern()
             .replacen(&link.destination, self.limit, &self.replacement);
+
         let text = if let Some(caps) = self.tail.captures(&link.destination) {
-            if let Some(text) = caps.name("text") {
-                text.as_str().to_string()
-            } else {
-                snippet.to_string()
-            }
+            caps.name("text")
+                .map(|m| m.as_str())
+                .unwrap_or(snippet)
+                .to_string()
         } else {
             snippet.to_string()
         };

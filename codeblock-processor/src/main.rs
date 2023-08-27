@@ -65,8 +65,7 @@ fn main() -> anyhow::Result<()> {
                 let event = Event::Text(
                     current_block
                         .take()
-                        .map(CowStr::from)
-                        .unwrap_or(code.clone()),
+                        .map_or_else(|| code.clone(), CowStr::from),
                 );
                 new_vec.push(event);
                 if let Some(ref fence) = current_fence.take() {

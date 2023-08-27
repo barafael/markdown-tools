@@ -1,7 +1,7 @@
 use pulldown_cmark::CowStr;
 
-pub(crate) mod playground_button_inserter;
-pub(crate) mod snippet_button_inserter;
+pub mod playground_button_inserter;
+pub mod snippet_button_inserter;
 
 pub trait ButtonInserter {
     fn handle_codeblock(

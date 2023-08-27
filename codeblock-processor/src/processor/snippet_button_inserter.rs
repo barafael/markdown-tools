@@ -31,8 +31,8 @@ impl ButtonInserter for SnippetButtonInserter {
         if let Some(marker) = context {
             let marker = marker.split_once(':').unwrap().1;
             if let Some(value) = self.snippets.get(marker) {
-                let content = &value.content;
-                let dedented = textwrap::dedent(content);
+                let snippet = &value.content;
+                let dedented = textwrap::dedent(snippet);
                 *current_block = Some(dedented);
 
                 let url = if value.file.is_absolute() {
