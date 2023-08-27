@@ -2,6 +2,9 @@
 name = "snippet-extractor"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "Simple tool to extract code (or other) snippets marked up in normal source code."
+repository = "https://github.com/barafael/markdown-tools"
 
 [dependencies]
 anyhow = "1.0.72"

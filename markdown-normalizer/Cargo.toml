@@ -2,6 +2,9 @@
 name = "markdown-normalizer"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "Simple for normalizing markdown files for use with other markdown tools from this repo."
+repository = "https://github.com/barafael/markdown-tools"
 
 [dependencies]
 anyhow = "1.0.72"
