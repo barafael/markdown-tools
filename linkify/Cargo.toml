@@ -12,15 +12,15 @@ assert_fs = "1.0.13"
 predicates = "3.0.3"
 
 [dependencies]
-anyhow = "1.0.72"
-clap = { version = "4.3.16", features = ["derive"] }
-dyn-clone = "1.0.12"
+anyhow = "1.0.75"
+clap = { version = "4.4.0", features = ["derive"] }
+dyn-clone = "1.0.13"
 pulldown-cmark = "0.9.3"
-pulldown-cmark-to-cmark = "10.0.4"
-regex = { version = "1.9.1" }
-reqwest = { version = "0.11.18", features = ["blocking"] }
+pulldown-cmark-to-cmark = "11.0.0"
+regex = { version = "1.9.4" }
+reqwest = { version = "0.11.20", features = ["blocking"] }
 select = "0.6.0"
-serde = { version = "1.0.171", features = ["derive"] }
+serde = { version = "1.0.188", features = ["derive"] }
 serde_regex = "1.1.0"
-tempfile = "3.6.0"
+tempfile = "3.8.0"
 toml = "0.7.6"

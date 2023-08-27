@@ -7,7 +7,7 @@ description = "Simple for normalizing markdown files for use with other markdown
 repository = "https://github.com/barafael/markdown-tools"
 
 [dependencies]
-anyhow = "1.0.72"
-clap = { version = "4.3.16", features = ["derive"] }
+anyhow = "1.0.75"
+clap = { version = "4.4.0", features = ["derive"] }
 pulldown-cmark = "0.9.3"
 pulldown-cmark-to-cmark = "11.0.0"
