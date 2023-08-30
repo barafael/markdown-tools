@@ -37,13 +37,18 @@ impl ButtonInserter for SnippetButtonInserter {
 
                 let url = if value.file.is_absolute() {
                     format!(
-                        "vscode://file{}:{}:{}",
+                        "'vscode://file{}:{}:{}'",
                         value.file.display(),
                         value.line + 1,
                         value.col
                     )
                 } else {
-                    todo!("handle relative paths using window.location.href");
+                    format!(
+                        "'vscode://file/'.concat(make_path('{}:{}:{}'))",
+                        value.file.display(),
+                        value.line + 1,
+                        value.col
+                    )
                 };
                 *current_url = Some(url);
                 *current_btn_text = Some("Open VSCode".into());

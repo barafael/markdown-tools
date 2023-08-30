@@ -58,7 +58,7 @@ impl ButtonInserter for PlaygroundButtonInserter {
 
         let text = encode(&text);
         let text = format!(
-            "https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&code={text}"
+            "'https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&code={text}'"
         );
 
         *current_url = Some(text);

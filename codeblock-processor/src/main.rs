@@ -50,6 +50,7 @@ fn main() -> anyhow::Result<()> {
 
     let i = parser.collect::<Vec<_>>();
     let mut new_vec = Vec::with_capacity(i.len());
+
     for event in i {
         match event.clone() {
             Event::Start(Tag::CodeBlock(kind)) => {
@@ -90,9 +91,9 @@ fn main() -> anyhow::Result<()> {
                 if args.button {
                     if let Some(url) = current_url.take() {
                         new_vec.push(Event::Html("<p style=\"position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0\">\n".into()));
-                        new_vec.push(Event::Html("<button\n    onclick=\"window.open('".into()));
+                        new_vec.push(Event::Html("<button\n    onclick=\"window.open(".into()));
                         new_vec.push(Event::Html(url.into()));
-                        new_vec.push(Event::Html("','_blank')\"\n".into()));
+                        new_vec.push(Event::Html(",'_blank')\"\n".into()));
                         new_vec.push(Event::Html("    style=\"\n".into()));
                         new_vec.push(Event::Html("    height: fit-content;\n".into()));
                         new_vec.push(Event::Html("    margin: 0;\n".into()));
@@ -109,6 +110,9 @@ fn main() -> anyhow::Result<()> {
             _ => new_vec.push(event),
         };
     }
+
+    new_vec.push(Event::Html(include_str!("make_path.html").into()));
+
     let mut buf = String::with_capacity(input.len() + 1000);
 
     let _state = cmark(&mut new_vec.into_iter(), &mut buf)?;
