@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<()> {
         Snippets::default()
     };
 
-    let input = fs::read_to_string(args.markdown_file).unwrap();
+    let input = fs::read_to_string(args.markdown_file).context("Failed to open input file")?;
 
     let parser = Parser::new(&input);
 
@@ -62,12 +62,6 @@ fn main() -> anyhow::Result<()> {
                 new_vec.push(event);
             }
             Event::Text(ref code) => {
-                let event = Event::Text(
-                    current_block
-                        .take()
-                        .map_or_else(|| code.clone(), CowStr::from),
-                );
-                new_vec.push(event);
                 if let Some(ref fence) = current_fence.take() {
                     snippet_inserter.handle_codeblock(
                         fence,
@@ -84,6 +78,12 @@ fn main() -> anyhow::Result<()> {
                         &mut current_btn_text,
                     );
                 }
+                let event = Event::Text(
+                    current_block
+                        .take()
+                        .map_or_else(|| code.clone(), CowStr::from),
+                );
+                new_vec.push(event);
             }
             Event::End(Tag::CodeBlock(_)) => {
                 new_vec.push(event);
