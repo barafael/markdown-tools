@@ -1,0 +1,6 @@
+[[regex]]
+tag = 'PS-'
+tail = '\d+'
+replacement = "https://internal.jira.com/$text"
+limit = 1
+strip_tag = false
