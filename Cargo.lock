@@ -786,7 +786,6 @@ dependencies = [
  "anyhow",
  "clap",
  "itertools 0.11.0",
- "once_cell",
  "pulldown-cmark",
  "pulldown-cmark-to-cmark",
  "serde",
