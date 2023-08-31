@@ -1,9 +1,13 @@
 File         =  {
-    SOI ~ Anything ~ (Snippet ~ Anything)* ~ EOI
+    SOI ~ Anything? ~ (Snippet ~ Anything)* ~ EOI
 }
-Snippet      =  { Marker_start ~ PUSH(Identifier) ~ NEWLINE ~ Snippet_text ~ Marker_end ~ POP ~ NEWLINE }
-Snippet_text =  { (!Marker_end ~ ANY)* }
-Anything     =  _{ (!Marker_start ~ ANY)* }
+
 Identifier   = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
-Marker_start =  _{ "// marker-start " }
-Marker_end   =  _{ "// marker-end " }
+
+Marker_start = _{ "// marker-start " }
+Marker_end   = _{ "// marker-end " }
+
+Snippet_text =  { (!Marker_end ~ ANY)* }
+Anything     = _{ (!Marker_start ~ ANY)* }
+
+Snippet      =  { Marker_start ~ PUSH(Identifier) ~ NEWLINE ~ Snippet_text ~ Marker_end ~ POP ~ NEWLINE }

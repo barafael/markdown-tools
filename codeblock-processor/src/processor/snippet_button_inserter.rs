@@ -35,21 +35,12 @@ impl ButtonInserter for SnippetButtonInserter {
                 let dedented = textwrap::dedent(snippet);
                 *current_block = Some(dedented);
 
-                let url = if value.file.is_absolute() {
-                    format!(
-                        "'vscode://file{}:{}:{}'",
-                        value.file.display(),
-                        value.line + 1,
-                        value.col
-                    )
-                } else {
-                    format!(
-                        "'vscode://file/'.concat(make_path('{}:{}:{}'))",
-                        value.file.display(),
-                        value.line + 1,
-                        value.col
-                    )
-                };
+                let url = format!(
+                    "'vscode://file/'.concat(make_path('{}:{}:{}'))",
+                    value.file.as_str(),
+                    value.line + 1,
+                    value.col
+                );
                 *current_url = Some(url);
                 *current_btn_text = Some("Open VSCode".into());
             }

@@ -1,9 +1,9 @@
-use std::path::PathBuf;
+use std::{fs::read_to_string, path::PathBuf};
 
 use crate::parser::{Rule, SnippetParser};
 use clap::Parser as ClapParser;
 use pest::Parser;
-use snippet::{Snippet, Snippets};
+use snippet::{RelativePathBuf, Snippet, Snippets};
 use walkdir::DirEntry;
 
 mod parser;
@@ -13,6 +13,9 @@ mod parser;
 pub struct Arguments {
     #[arg(short, long)]
     directory: PathBuf,
+
+    #[arg(short, long, default_value_t = false)]
+    relative: bool,
 
     #[arg(short, long, default_value = "snippets.json")]
     output: PathBuf,
@@ -36,7 +39,7 @@ fn main() -> anyhow::Result<()> {
         .filter_map(Result::ok)
     {
         if entry.path().is_file() {
-            let content = std::fs::read_to_string(entry.path())?;
+            let content = read_to_string(entry.path())?;
 
             let pairs = SnippetParser::parse(Rule::File, &content)?;
             for pair in pairs.into_iter().next().unwrap().into_inner() {
@@ -47,7 +50,7 @@ fn main() -> anyhow::Result<()> {
                     let snippet_text = snippet.next().unwrap().as_str().to_string();
                     let snippet = Snippet {
                         content: snippet_text,
-                        file: entry.path().canonicalize()?,
+                        file: RelativePathBuf::from_path(entry.path()).unwrap(),
                         line,
                         col,
                     };
