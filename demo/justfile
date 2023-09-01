@@ -1,5 +1,5 @@
 snippets:
-    snippet-extractor --directory demo --output snippets.json
+    snippet-extractor --directory code --output snippets.json
     # later, eventually: snippet-extractor --directory . --output snippets.json
 
 autolink:

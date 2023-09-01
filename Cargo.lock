@@ -790,7 +790,7 @@ dependencies = [
  "pulldown-cmark-to-cmark",
  "serde",
  "serde_json",
- "snippet",
+ "snippet-extractor",
  "take-until",
  "textwrap",
  "urlencoding",
@@ -1503,14 +1503,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f67ad224767faa3c7d8b6d91985b78e70a1324408abcb1cfcc2be4c06bc06043"
 
 [[package]]
-name = "snippet"
-version = "0.1.0"
-dependencies = [
- "relative-path",
- "serde",
-]
-
-[[package]]
 name = "snippet-extractor"
 version = "0.1.0"
 dependencies = [
@@ -1518,9 +1510,9 @@ dependencies = [
  "clap",
  "pest",
  "pest_derive",
+ "relative-path",
  "serde",
  "serde_json",
- "snippet",
  "walkdir",
 ]
 

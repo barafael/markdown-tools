@@ -12,9 +12,9 @@ color: "dark-gray"
 Just annotate your source code with:
 
 ````rust
-// marker-start: meta
+// marker-start meta
 fn some_code() {}
-// marker-end: meta
+// marker-end meta
 ````
 after running the codeblock processor:
 
@@ -100,7 +100,7 @@ just all
 
 ---
 
-## Generating manually: Run Linkify
+## Generating manually: Linkify
 
 Autolink:
 ````bash
@@ -109,7 +109,7 @@ markdown-linkify blob.md --config linkify.toml --output processed.md
 
 ---
 
-## Generating manually: Snippets:
+## Generating manually: Snippets
 
 Extract from source files:
 ````bash

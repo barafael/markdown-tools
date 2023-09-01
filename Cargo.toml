@@ -1,11 +1,5 @@
 [workspace]
 
-members = [
-    "linkify",
-    "normalizer",
-    "codeblock-processor",
-    "snippet-extractor",
-    "snippet",
-]
+members = ["linkify", "normalizer", "codeblock-processor", "snippet-extractor"]
 
 resolver = "2"

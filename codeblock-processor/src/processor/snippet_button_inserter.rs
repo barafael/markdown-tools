@@ -1,5 +1,5 @@
 use pulldown_cmark::CowStr;
-use snippet::Snippets;
+use snippet_extractor::Snippets;
 
 use super::ButtonInserter;
 

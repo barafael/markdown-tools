@@ -1,12 +1,13 @@
 use std::{fs::read_to_string, path::PathBuf};
 
-use crate::parser::{Rule, SnippetParser};
 use clap::Parser as ClapParser;
+use parser::{Rule, SnippetParser};
 use pest::Parser;
-use snippet::{RelativePathBuf, Snippet, Snippets};
+use relative_path::RelativePathBuf;
+use snippet_extractor::{Snippet, Snippets};
 use walkdir::DirEntry;
 
-mod parser;
+pub(crate) mod parser;
 
 #[derive(Debug, ClapParser)]
 #[command(author, version)]

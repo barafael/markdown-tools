@@ -5,7 +5,7 @@ use processor::snippet_button_inserter::SnippetButtonInserter;
 use processor::ButtonInserter;
 use pulldown_cmark::{CodeBlockKind, CowStr, Event, Parser, Tag};
 use pulldown_cmark_to_cmark::cmark;
-use snippet::Snippets;
+use snippet_extractor::Snippets;
 use std::path::PathBuf;
 use std::{fs, io::Write};
 

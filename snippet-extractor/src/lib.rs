@@ -6,7 +6,7 @@ pub use relative_path::RelativePathBuf;
 
 pub type Snippets = HashMap<String, Snippet>;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Snippet {
     pub content: String,
     pub file: RelativePathBuf,
