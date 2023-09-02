@@ -1,15 +1,22 @@
 snippets:
-    snippet-extractor --directory code --output snippets.json
-    # later, eventually: snippet-extractor --directory . --output snippets.json
+    # marker-start extractsnippets
+    snippet-extractor --directory . --output snippets.json --relative
+    # marker-end extractsnippets
 
 autolink:
-    markdown-linkify demo.md --config linkify.toml --output processed.md
+    # marker-start autolink
+    markdown-linkify demo.md --config linkify.toml --output autolinked.md
+    # marker-end autolink
 
 codeblocks:
-    markdown-codeblock-processor processed.md --snippets snippets.json -o final.md
+    # marker-start codeblocks
+    markdown-codeblock-processor autolinked.md --snippets snippets.json -o final.md
+    # marker-end codeblocks
 
 marp:
+    # marker-start runmarp
     marp --allow-local-files --html --pdf-outlines.headings true --pdf-outlines.pages true final.md --html true --theme ../rhea.css
+    # marker-end runmarp
 
 all: snippets autolink codeblocks marp
     chromium final.html

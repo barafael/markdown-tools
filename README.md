@@ -33,3 +33,9 @@ A fun collection of different tools which transform markdown to different markdo
 - [x] lib-ificate the implementations with thin bin+cli+config file frontends
 
 - [x] Move the snippet crate into another crate or rename it to something ominous, in order to be able to publish it. Or, incorporate it into the snippet-extractor public API.
+
+- [ ] Allow suppressing button generation via fence attribute
+
+- [ ] Local file link replacer: Simple replacer that allows opening files (link linkify.toml in the demo.md as an example)
+
+- [ ] wildly improve the demo.md
