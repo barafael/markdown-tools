@@ -35,3 +35,4 @@ The specific replacements depend on the matching transformer.
 * [x] support composite text events
 * [x] implement LinkMetadata as iterator
 * [x] figure out how to publish linkify on crates.io
+* [ ] check how code insertion should actually work

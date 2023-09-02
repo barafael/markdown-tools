@@ -1,0 +1,8 @@
+autolink:
+    markdown-linkify demo.md --config linkify.toml --output autolinked.md
+
+marp:
+    marp --allow-local-files --html --pdf-outlines.headings true --pdf-outlines.pages true autolinked.md --html true --theme ../rhea.css
+
+all: autolink marp
+    chromium autolinked.html

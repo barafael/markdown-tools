@@ -1,7 +1,7 @@
 [[regex]]
 tag = 'PS-'
 tail = '\d+'
-replacement = "internal.jira.com/$text"
+replacement = "https://internal.jira.com/$text"
 limit = 1
 strip_tag = false
 
