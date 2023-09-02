@@ -37,7 +37,7 @@ fn main() -> anyhow::Result<()> {
         let example = Transformers::example();
         let example = toml::to_string_pretty(&example)?;
         std::fs::write(
-            args.config.unwrap_or("linkify.example.toml".into()),
+            args.config.unwrap_or_else(|| "linkify.example.toml".into()),
             example,
         )?;
         return Ok(());

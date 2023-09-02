@@ -38,6 +38,7 @@ pub struct Transformers {
 
 impl Transformers {
     /// An example configuration, used to generate a template file.
+    #[must_use]
     pub fn example() -> Self {
         Self {
             regex: vec![Substitution::example()],
