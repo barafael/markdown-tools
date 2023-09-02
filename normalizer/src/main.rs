@@ -1,3 +1,4 @@
+use anyhow::Context;
 use clap::Parser as ClapParser;
 use pulldown_cmark::Parser;
 use pulldown_cmark_to_cmark::cmark;
@@ -7,7 +8,7 @@ use std::{fs, io::Write};
 #[derive(Debug, Clone, ClapParser)]
 struct Arguments {
     #[arg()]
-    markdown_file: PathBuf,
+    input: PathBuf,
 
     #[arg(short, long)]
     output: Option<PathBuf>,
@@ -19,7 +20,7 @@ struct Arguments {
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
-    let input = fs::read_to_string(args.markdown_file).unwrap();
+    let input = fs::read_to_string(args.input).context("Failed to read input file")?;
 
     let mut parser = Parser::new(&input).inspect(|elem| {
         if args.dump {

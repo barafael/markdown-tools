@@ -68,7 +68,11 @@ fn format_rust_code_block(code: &str) -> String {
         .arg("--edition=2021")
         .spawn()
         .and_then(|mut child| {
-            child.stdin.as_mut().unwrap().write_all(code.as_bytes())?;
+            child
+                .stdin
+                .as_mut()
+                .expect("Failed to get stdin of child process")
+                .write_all(code.as_bytes())?;
             let output = child.wait_with_output()?;
             Ok(output.stdout)
         });

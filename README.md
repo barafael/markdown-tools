@@ -14,7 +14,7 @@ A fun collection of different tools which transform markdown to different markdo
 
 - [ ] snippet-compiler: extract snippets, run them through rustc+clippy
 
-- [ ] make linkify.toml optional
+- [x] make linkify.toml optional
 
 - [x] Unify all the CLI arguments, everywhere
 
@@ -22,7 +22,7 @@ A fun collection of different tools which transform markdown to different markdo
 
 - [ ] Make sure the linkify tool works with all replacers on all link types
 
-- [ ] Reduce the number of unwraps
+- [x] Reduce the number of unwraps
 
 - [ ] Consider implementing a codeblock iterator like done with the linkify tool. It should stream (codeblock, button options, header/footer html)
 

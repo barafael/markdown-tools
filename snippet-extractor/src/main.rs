@@ -1,5 +1,6 @@
 use std::{fs::read_to_string, io::Write, path::PathBuf};
 
+use anyhow::Context;
 use clap::Parser as ClapParser;
 use ignore::Walk;
 use parser::parse;
@@ -26,15 +27,20 @@ fn main() -> anyhow::Result<()> {
 
     let mut map = Snippets::default();
 
-    let directory = args.directory.parse_dot().unwrap();
+    let directory = args
+        .directory
+        .parse_dot()
+        .context("Failed to parse input directory")?;
+    let current_dir = std::env::current_dir().context("Failed to get current directory")?;
+
     for entry in Walk::new(directory).filter_map(Result::ok) {
         if entry.path().is_file() {
             let content = read_to_string(entry.path())?;
             let path = if args.relative {
                 entry
                     .path()
-                    .strip_prefix(std::env::current_dir().unwrap())
-                    .unwrap()
+                    .strip_prefix(&current_dir)
+                    .context("Could not create relative path")?
             } else {
                 entry.path()
             };

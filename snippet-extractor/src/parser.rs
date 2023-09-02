@@ -5,9 +5,11 @@ use snippet_extractor::Snippet;
 
 use {once_cell::sync::Lazy, regex::Regex};
 
-static MARKER_START: Lazy<Regex> = Lazy::new(|| Regex::new(r"[//|#] marker-start (\w+)").unwrap());
+static MARKER_START: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"[//|#] marker-start (\w+)").expect("invalid regex"));
 
-static MARKER_END: Lazy<Regex> = Lazy::new(|| Regex::new(r"[//|#] marker-end (\w+)").unwrap());
+static MARKER_END: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"[//|#] marker-end (\w+)").expect("invalid regex"));
 
 pub fn parse(text: &str, file: &Path) -> BTreeMap<String, Snippet> {
     let mut snippets = BTreeMap::default();

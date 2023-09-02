@@ -14,7 +14,7 @@ mod processor;
 #[derive(Debug, Clone, ClapParser)]
 struct Arguments {
     #[arg()]
-    markdown_file: PathBuf,
+    input: PathBuf,
 
     #[arg(long, default_value_t = true)]
     button: bool,
@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<()> {
         Snippets::default()
     };
 
-    let input = fs::read_to_string(args.markdown_file).context("Failed to open input file")?;
+    let input = fs::read_to_string(args.input).context("Failed to open input file")?;
 
     let parser = Parser::new(&input);
 

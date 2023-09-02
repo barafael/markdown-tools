@@ -18,7 +18,7 @@ struct Arguments {
 
     /// Configuration file in TOML format.
     #[arg(short, long, default_value = "linkify.toml")]
-    config: PathBuf,
+    config: Option<PathBuf>,
 
     /// Write example configuration file?
     /// No further action is taken.
@@ -36,16 +36,21 @@ fn main() -> anyhow::Result<()> {
     if args.example {
         let example = Transformers::example();
         let example = toml::to_string_pretty(&example)?;
-        std::fs::write(&args.config, example)?;
+        std::fs::write(
+            args.config.unwrap_or("linkify.example.toml".into()),
+            example,
+        )?;
         return Ok(());
     }
 
-    let regex_replacers: Transformers = toml::from_str(
-        fs::read_to_string(&args.config)
-            .context("Failed to read transformer config file")?
-            .as_str(),
-    )
-    .context("Failed to deserialize toml config file")?;
+    let regex_replacers = if let Some(config) = args.config {
+        toml::from_str::<Transformers>(
+            &fs::read_to_string(&config).context("Failed to read transformer config file")?,
+        )
+        .context("Failed to deserialize toml config file")?
+    } else {
+        Transformers::default()
+    };
 
     // Create a vector with `LinkTransformer` trait objects.
     // Some of which are read in from the config file.

@@ -183,7 +183,7 @@ mod test {
         let parser = Parser::new_with_broken_link_callback(md, Options::empty(), Some(cb));
 
         let mut buf = String::new();
-        let _state = cmark(parser, &mut buf).unwrap();
+        let _state = cmark(parser, &mut buf).expect("CMark failed");
         println!("{buf}");
     }
 
