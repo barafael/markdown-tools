@@ -12,6 +12,7 @@ fn linkifies() -> anyhow::Result<()> {
     cmd.assert().success();
 
     let doc = std::fs::read_to_string(output.path()).unwrap();
-    dbg!(doc);
+    //println!("{}", &doc);
+    assert_eq!(doc, include_str!("../tests/output1.md"));
     Ok(())
 }

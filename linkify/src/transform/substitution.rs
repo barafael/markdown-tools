@@ -57,10 +57,11 @@ impl LinkTransformer for Substitution {
             .pattern()
             .replacen(&link.destination, self.limit, &self.replacement);
 
+        let new_text = link.destination.clone();
         let text = if let Some(caps) = self.tail.captures(&link.destination) {
             caps.name("text")
-                .map(|m| m.as_str())
-                .unwrap_or(snippet)
+                .map(|m: regex::Match<'_>| m.as_str())
+                .unwrap_or(&new_text)
                 .to_string()
         } else {
             snippet.to_string()
@@ -73,5 +74,30 @@ impl LinkTransformer for Substitution {
             link.title = link.destination.clone();
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn grtp_replacement() {
+        // let input = "[](GTPR-12355)";
+        let sub = Substitution {
+            tail: Regex::new(r"\d+").unwrap(),
+            tag: "GTPR-".into(),
+            replacement: "http://www.grtp.de/issue/$text".to_string(),
+            limit: 0,
+            code: true,
+        };
+        let link = &mut Link {
+            link_type: LinkType::Reference,
+            destination: "GTPR-12355".into(),
+            title: "".into(),
+            text: vec![],
+        };
+        sub.apply(link).unwrap();
+        dbg!(link);
     }
 }
