@@ -9,9 +9,11 @@ repository = "https://github.com/barafael/markdown-tools"
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.2", features = ["derive"] }
-pest = "2.7.3"
-pest_derive = "2.7.3"
+itertools = "0.11.0"
+once_cell = "1.18.0"
+path-dedot = "3.1.0"
+regex = "1.9.4"
 relative-path = { version = "1.9.0", features = ["serde"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
-walkdir = "2.3.3"
+ignore = "0.4.20"

@@ -30,14 +30,14 @@ impl ButtonInserter for SnippetButtonInserter {
             .pop();
         if let Some(marker) = context {
             let marker = marker.split_once(':').unwrap().1;
-            if let Some(value) = self.snippets.get(marker) {
+            for value in self.snippets.snippets_for_id(marker) {
                 let snippet = &value.content;
                 let dedented = textwrap::dedent(snippet);
                 *current_block = Some(dedented);
 
                 let url = format!(
                     "'vscode://file/'.concat(make_path('{}:{}:{}'))",
-                    value.file.as_str(),
+                    value.file.display(),
                     value.line + 1,
                     value.col
                 );

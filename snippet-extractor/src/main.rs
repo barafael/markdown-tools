@@ -1,11 +1,10 @@
-use std::{fs::read_to_string, path::PathBuf};
+use std::{fs::read_to_string, io::Write, path::PathBuf};
 
 use clap::Parser as ClapParser;
-use parser::{Rule, SnippetParser};
-use pest::Parser;
-use relative_path::RelativePathBuf;
-use snippet_extractor::{Snippet, Snippets};
-use walkdir::DirEntry;
+use ignore::Walk;
+use parser::parse;
+use path_dedot::ParseDot;
+use snippet_extractor::Snippets;
 
 pub(crate) mod parser;
 
@@ -19,48 +18,41 @@ pub struct Arguments {
     relative: bool,
 
     #[arg(short, long, default_value = "snippets.json")]
-    output: PathBuf,
-}
-
-fn is_hidden(entry: &DirEntry) -> bool {
-    entry
-        .file_name()
-        .to_str()
-        .map_or(false, |s| s.starts_with('.'))
+    output: Option<PathBuf>,
 }
 
 fn main() -> anyhow::Result<()> {
     let args = Arguments::parse();
 
-    let mut map = Snippets::new();
+    let mut map = Snippets::default();
 
-    for entry in walkdir::WalkDir::new(args.directory)
-        .into_iter()
-        .filter_entry(|e| !is_hidden(e))
-        .filter_map(Result::ok)
-    {
+    let directory = args.directory.parse_dot().unwrap();
+    for entry in Walk::new(directory).filter_map(Result::ok) {
         if entry.path().is_file() {
             let content = read_to_string(entry.path())?;
-
-            let pairs = SnippetParser::parse(Rule::File, &content)?;
-            for pair in pairs.into_iter().next().unwrap().into_inner() {
-                if pair.as_rule() == Rule::Snippet {
-                    let (line, col) = pair.line_col();
-                    let mut snippet = pair.into_inner();
-                    let identifier = snippet.next().unwrap().as_str().to_string();
-                    let snippet_text = snippet.next().unwrap().as_str().to_string();
-                    let snippet = Snippet {
-                        content: snippet_text,
-                        file: RelativePathBuf::from_path(entry.path()).unwrap(),
-                        line,
-                        col,
-                    };
-                    map.insert(identifier, snippet);
-                }
+            let path = if args.relative {
+                entry
+                    .path()
+                    .strip_prefix(std::env::current_dir().unwrap())
+                    .unwrap()
+            } else {
+                entry.path()
+            };
+            let snippets = parse(&content, path);
+            if !snippets.is_empty() {
+                map.snippets.insert(path.to_path_buf(), snippets);
             }
         }
     }
+
     let json = serde_json::to_string_pretty(&map)?;
-    std::fs::write(args.output, json)?;
+
+    if let Some(path) = args.output {
+        std::fs::write(path, json)?;
+    } else {
+        let mut stdout = std::io::stdout();
+        stdout.write_all(json.as_bytes())?;
+    }
+
     Ok(())
 }

@@ -10,14 +10,8 @@ use urlencoding::encode;
 
 use super::ButtonInserter;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PlaygroundButtonInserter;
-
-impl PlaygroundButtonInserter {
-    pub fn new() -> Self {
-        Self
-    }
-}
 
 impl ButtonInserter for PlaygroundButtonInserter {
     fn handle_codeblock(

@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
     let parser = Parser::new(&input);
 
     let snippet_inserter = SnippetButtonInserter::with_snippets(snippets);
-    let playground_inserter = PlaygroundButtonInserter::new();
+    let playground_inserter = PlaygroundButtonInserter;
 
     let mut current_url = None;
     let mut current_block = None;
