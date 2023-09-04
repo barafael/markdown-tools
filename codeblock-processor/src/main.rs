@@ -49,7 +49,7 @@ fn main() -> anyhow::Result<()> {
     let mut current_btn_text = None;
 
     let i = parser.collect::<Vec<_>>();
-    let mut new_vec = Vec::with_capacity(i.len());
+    let mut document = Vec::with_capacity(i.len());
 
     for event in i {
         match event.clone() {
@@ -58,9 +58,9 @@ fn main() -> anyhow::Result<()> {
                     current_fence = Some(text);
                 }
                 if args.button {
-                    new_vec.push(Event::Html("<div style=\"position: relative;\">".into()));
+                    document.push(Event::Html("<div style=\"position: relative;\">".into()));
                 }
-                new_vec.push(event);
+                document.push(event);
             }
             Event::Text(ref code) => {
                 if let Some(ref fence) = current_fence.take() {
@@ -79,54 +79,91 @@ fn main() -> anyhow::Result<()> {
                         &mut current_btn_text,
                     );
                 }
+
                 let event = Event::Text(
                     current_block
                         .take()
                         .map_or_else(|| code.clone(), CowStr::from),
                 );
-                new_vec.push(event);
+                document.push(event);
             }
             Event::End(Tag::CodeBlock(_)) => {
-                new_vec.push(event);
+                document.push(event);
                 if args.button {
                     if let Some(url) = current_url.take() {
-                        new_vec.push(Event::Html("<p style=\"position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0\">\n".into()));
-                        new_vec.push(Event::Html("<button\n    onclick=\"window.open(".into()));
-                        new_vec.push(Event::Html(url.into()));
-                        new_vec.push(Event::Html(",'_blank')\"\n".into()));
-                        new_vec.push(Event::Html("    style=\"\n".into()));
-                        new_vec.push(Event::Html("    height: fit-content;\n".into()));
-                        new_vec.push(Event::Html("    margin: 0;\n".into()));
-                        new_vec.push(Event::Html("    font-weight: bold;\"\n".into()));
-                        new_vec.push(Event::Html(
-                            format!(">{}\n", current_btn_text.take().unwrap_or_default()).into(),
-                        ));
-                        new_vec.push(Event::Html("</button>\n".into()));
-                        new_vec.push(Event::Html("</p>\n".into()));
+                        let btn_text = current_btn_text.take().unwrap_or_default();
+                        let button = make_button(url, btn_text);
+                        document.extend(button.into_iter());
                     }
-                    new_vec.push(Event::Html("</div>\n".into()));
+                    document.push(Event::Html("</div>\n".into()));
                 }
             }
-            _ => new_vec.push(event),
+            _ => document.push(event),
         };
     }
 
-    new_vec.push(Event::Html(include_str!("make_path.html").into()));
-    new_vec.push(Event::Text("\n".into()));
+    document.push(Event::Html(include_str!("make_path.html").into()));
+    document.push(Event::Text("\n".into()));
 
-    new_vec.push(Event::Html(include_str!("blur_button.html").into()));
-    new_vec.push(Event::Text("\n".into()));
+    document.push(Event::Html(include_str!("blur_button.html").into()));
+    document.push(Event::Text("\n".into()));
 
-    let mut buf = String::with_capacity(input.len() + 1000);
+    let mut output = String::with_capacity(input.len() + 1000);
 
-    let _state = cmark(&mut new_vec.into_iter(), &mut buf)?;
+    let _state = cmark(&mut document.into_iter(), &mut output)?;
 
     if let Some(path) = args.output {
-        std::fs::write(path, buf)?;
+        std::fs::write(path, output)?;
     } else {
         let mut stdout = std::io::stdout();
-        stdout.write_all(buf.as_bytes())?;
+        stdout.write_all(output.as_bytes())?;
     }
 
     Ok(())
+}
+
+fn make_button<'a>(url: String, btn_text: String) -> Vec<Event<'a>> {
+    let mut button = Vec::new();
+    button.push(Event::Html("<p style=\"position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0\">\n".into()));
+    button.push(Event::Html("<button\n    onclick=\"window.open(".into()));
+    button.push(Event::Html(url.into()));
+    button.push(Event::Html(",'_blank')\"\n".into()));
+    button.push(Event::Html("    style=\"\n".into()));
+    button.push(Event::Html("    height: fit-content;\n".into()));
+    button.push(Event::Html("    margin: 0;\n".into()));
+    button.push(Event::Html("    font-weight: bold;\"\n".into()));
+    button.push(Event::Html(format!(">{}\n", btn_text).into()));
+    button.push(Event::Html("</button>\n".into()));
+    button.push(Event::Html("</p>\n".into()));
+    button
+}
+
+#[cfg(test)]
+mod test {
+    use pulldown_cmark_to_cmark::cmark;
+
+    use crate::make_button;
+
+    #[test]
+    fn makes_button() {
+        let mut output = String::new();
+        let button = make_button(
+            "'https://www.example.com'".to_string(),
+            "Example.com!".into(),
+        );
+        let _state = cmark(&mut button.into_iter(), &mut output).unwrap();
+
+        let expected = r#"<p style="position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0">
+<button
+    onclick="window.open('https://www.example.com','_blank')"
+    style="
+    height: fit-content;
+    margin: 0;
+    font-weight: bold;"
+>Example.com!
+</button>
+</p>
+"#;
+        assert_eq!(expected, output);
+    }
 }
