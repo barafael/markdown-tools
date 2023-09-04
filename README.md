@@ -39,3 +39,7 @@ A fun collection of different tools which transform markdown to different markdo
 - [ ] Local file link replacer: Simple replacer that allows opening files (link linkify.toml in the demo.md as an example)
 
 - [ ] wildly improve the demo.md
+
+- [x] support wrapping playground text with predefined wrappers like main, anyhow-main, and tokio-anyhow-main
+
+- [ ] make the generated buttons never have focus

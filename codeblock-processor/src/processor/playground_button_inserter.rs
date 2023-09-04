@@ -5,10 +5,17 @@ use std::{
 
 use itertools::Itertools;
 use pulldown_cmark::CowStr;
+use serde::{Deserialize, Serialize};
 use take_until::TakeUntilExt;
 use urlencoding::encode;
 
 use super::ButtonInserter;
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct Template {
+    pre: String,
+    post: String,
+}
 
 #[derive(Debug, Default)]
 pub struct PlaygroundButtonInserter;
@@ -22,6 +29,19 @@ impl ButtonInserter for PlaygroundButtonInserter {
         current_url: &mut Option<String>,
         current_btn_text: &mut Option<String>,
     ) {
+        let main_template = Template {
+            pre: String::from("fn main() {"),
+            post: String::from("}"),
+        };
+        let main_anyhow_template = Template {
+            pre: String::from("fn main() -> anyhow::Result<()> {"),
+            post: String::from("Ok(())\n}"),
+        };
+        let tokio_main_anyhow_template = Template {
+            pre: String::from("#[tokio::main]\nasync fn main() -> anyhow::Result<()> {"),
+            post: String::from("Ok(())\n}"),
+        };
+
         let tag = fence
             .split_whitespace()
             .filter(|s| s.starts_with("tag:"))
@@ -30,21 +50,46 @@ impl ButtonInserter for PlaygroundButtonInserter {
         if tag != Some("tag:playground-button") {
             return;
         }
-        let before = fence
-            .split_whitespace()
-            .skip_while(|elem| !elem.starts_with("playground-before:$\""))
-            .take_until(|elem| elem.ends_with("\"$"))
-            .join(" ");
-        let after = fence
-            .split_whitespace()
-            .skip_while(|elem| !elem.starts_with("playground-after:"))
-            .take_until(|elem| elem.ends_with("$\""))
-            .join(" ");
 
-        let before = before.replace("playground-before:$\"", "");
-        let before = before.replace("\"$", "");
-        let after = after.replace("playground-after:$\"", "");
-        let after = after.replace("\"$", "");
+        let template = if fence.split_whitespace().contains(&"playground-wrap:main") {
+            main_template
+        } else if fence
+            .split_whitespace()
+            .contains(&"playground-wrap:main_anyhow")
+        {
+            main_anyhow_template
+        } else if fence
+            .split_whitespace()
+            .contains(&"playground-wrap:main_tokio_anyhow")
+        {
+            tokio_main_anyhow_template
+        } else {
+            if fence.split_whitespace().contains(&"playground-wrap:") {
+                eprintln!("Warning: unknown playground wrap marker in \"{fence}\"");
+            }
+            let before = fence
+                .split_whitespace()
+                .skip_while(|elem| !elem.starts_with("playground-before:$\""))
+                .take_until(|elem| elem.ends_with("\"$"))
+                .join(" ");
+            let after = fence
+                .split_whitespace()
+                .skip_while(|elem| !elem.starts_with("playground-after:"))
+                .take_until(|elem| elem.ends_with("$\""))
+                .join(" ");
+            let before = before.replace("playground-before:$\"", "");
+            let before = before.replace("\"$", "");
+            let after = after.replace("playground-after:$\"", "");
+            let after = after.replace("\"$", "");
+
+            Template {
+                pre: before,
+                post: after,
+            }
+        };
+
+        let before = template.pre;
+        let after = template.post;
         let text = format!("{before}{code}{after}");
         let text = text.replace("\\n", "\n");
 

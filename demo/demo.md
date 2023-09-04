@@ -45,6 +45,24 @@ The processor will run your code through `Rustfmt`.
 
 ---
 
+## Playground Snippets
+
+````rust tag:playground-button playground-wrap:main_anyhow
+println!("I am in main");
+````
+
+Generated via this block:
+
+``````md marker:plsnippet
+```rust tag:playground-button playground-wrap:main_anyhow
+println!("I am in main");
+```
+``````
+
+Supported wrappers include `main`, `main_anyhow`, and `main_tokio_anyhow`
+
+---
+
 ## Linking to [`doc.rust-lang.org`](http://doc.rust-lang.org)
 
 ````md
