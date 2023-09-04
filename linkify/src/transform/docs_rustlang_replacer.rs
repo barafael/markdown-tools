@@ -55,7 +55,7 @@ impl LinkTransformer for DocsRustlang {
             .expect("Failed awaiting rustdoc result");
 
         if !output.success() {
-            eprintln!("Rustdoc exited with error {output:?}");
+            eprintln!("Warning: Rustdoc exited with error {output:?}");
         }
 
         // Read generated html
