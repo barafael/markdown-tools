@@ -124,6 +124,10 @@ fn format_rust_code_block(code: &str) -> String {
 
     // Return the formatted code as a String, or the original code block if there was an error
     match output {
+        Ok(vec) if vec.is_empty() => {
+            eprintln!("Failed to format Rust code.");
+            code.to_owned()
+        }
         Ok(formatted_output) => String::from_utf8_lossy(&formatted_output).into_owned(),
         Err(e) => {
             eprintln!("Failed to format Rust code: {e:?}");
