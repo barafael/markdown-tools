@@ -42,6 +42,6 @@ A fun collection of different tools which transform markdown to different markdo
 
 - [x] support wrapping playground text with predefined wrappers like main, anyhow-main, and tokio-anyhow-main
 
-- [ ] make the generated buttons never have focus
+- [x] make the generated buttons never have focus
 
 - [x] process faulty code anyway in playground inserter (Rustfmt)

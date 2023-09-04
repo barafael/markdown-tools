@@ -112,6 +112,10 @@ fn main() -> anyhow::Result<()> {
     }
 
     new_vec.push(Event::Html(include_str!("make_path.html").into()));
+    new_vec.push(Event::Text("\n".into()));
+
+    new_vec.push(Event::Html(include_str!("blur_button.html").into()));
+    new_vec.push(Event::Text("\n".into()));
 
     let mut buf = String::with_capacity(input.len() + 1000);
 
