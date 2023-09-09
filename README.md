@@ -45,3 +45,5 @@ A fun collection of different tools which transform markdown to different markdo
 - [x] make the generated buttons never have focus
 
 - [x] process faulty code anyway in playground inserter (Rustfmt)
+
+- [x] support `playground-indent`

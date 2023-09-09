@@ -75,7 +75,7 @@ impl ButtonInserter for PlaygroundButtonInserter {
             let after = fence
                 .split_whitespace()
                 .skip_while(|elem| !elem.starts_with("playground-after:"))
-                .take_until(|elem| elem.ends_with("$\""))
+                .take_until(|elem| elem.ends_with("\"$"))
                 .join(" ");
             let before = before.replace("playground-before:$\"", "");
             let before = before.replace("\"$", "");
@@ -90,6 +90,11 @@ impl ButtonInserter for PlaygroundButtonInserter {
 
         let before = template.pre;
         let after = template.post;
+        let code = if fence.split_whitespace().contains(&"playground-indent") {
+            textwrap::indent(&code, "    ")
+        } else {
+            code.to_string()
+        };
         let text = format!("{before}{code}{after}");
         let text = text.replace("\\n", "\n");
 
