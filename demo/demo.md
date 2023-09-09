@@ -91,13 +91,8 @@ after running markdown-linkify:
 
 With a config such as:
 
-````toml
-[[regex]]
-tag = 'PS-'
-tail = '\d+'
-replacement = "https://internal.jira.com/$text"
-limit = 1
-strip_tag = false
+````toml marker:linkifyjira
+
 ````
 
 for example, in `linkify.toml`
@@ -113,6 +108,30 @@ for example, in `linkify.toml`
 becomes:
 
 [PS-128]
+
+---
+
+## Custom Regex-based replacements
+
+With a config such as:
+
+````toml marker:linkifykeyword
+
+````
+
+for example, in `linkify.toml`
+
+---
+
+## Custom Regex-based replacements
+
+````md
+[keyword:const]
+````
+
+becomes:
+
+[keyword:const]
 
 ---
 

@@ -98,10 +98,10 @@ impl ButtonInserter for PlaygroundButtonInserter {
 
         let channel = fence
             .split_whitespace()
-            .filter(|s| s.starts_with("playground-version:"))
+            .filter(|s| s.starts_with("playground-channel:"))
             .next()
             .unwrap_or("stable");
-        let channel = channel.replace("playground-version:", "");
+        let channel = channel.replace("playground-channel:", "");
 
         let text = format!("{before}{code}{after}");
 

@@ -51,3 +51,5 @@ A fun collection of different tools which transform markdown to different markdo
 - [x] support channel for playground for example via `playground-channel:nightly`
 
 - [ ] formatter and normalizer type processors should probably have a -i "inline" flag
+
+- [ ] marker syntax uses space, whereas annotations in md use `:`. This is not ideal.

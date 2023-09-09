@@ -14,6 +14,8 @@ pub struct Substitution {
     limit: usize,
     #[serde(default)]
     code: bool,
+    #[serde(default)]
+    tail_only: bool,
 }
 
 /// Workaround for <https://github.com/serde-rs/serde/issues/368>
@@ -30,6 +32,7 @@ impl Substitution {
             replacement: "mycompany.jira.com/issues/PS-$text".to_string(),
             limit: 1,
             code: false,
+            tail_only: false,
         }
     }
 }
@@ -59,7 +62,7 @@ impl LinkTransformer for Substitution {
 
         let new_text = link.destination.clone();
         let text = if let Some(caps) = self.tail.captures(&link.destination) {
-            caps.name("text")
+            caps.name(self.tail.as_str())
                 .map(|m: regex::Match<'_>| m.as_str())
                 .unwrap_or(&new_text)
                 .to_string()
@@ -90,6 +93,7 @@ mod test {
             replacement: "http://www.grtp.de/issue/$text".to_string(),
             limit: 0,
             code: true,
+            tail_only: false,
         };
         let link = &mut Link {
             link_type: LinkType::Reference,

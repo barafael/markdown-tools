@@ -67,8 +67,6 @@ fn main() -> anyhow::Result<()> {
 
 ---
 
-
-
 ````rust no_run, marker:test1
 link+local
 ````
