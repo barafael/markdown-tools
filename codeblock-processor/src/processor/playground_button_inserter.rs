@@ -95,14 +95,23 @@ impl ButtonInserter for PlaygroundButtonInserter {
         } else {
             code.to_string()
         };
+
+        let channel = fence
+            .split_whitespace()
+            .filter(|s| s.starts_with("playground-version:"))
+            .next()
+            .unwrap_or("stable");
+        let channel = channel.replace("playground-version:", "");
+
         let text = format!("{before}{code}{after}");
+
         let text = text.replace("\\n", "\n");
 
         let text = format_rust_code_block(&text);
 
         let text = encode(&text);
         let text = format!(
-            "'https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&code={text}'"
+            "'https://play.rust-lang.org/?version={channel}&mode=debug&edition=2021&code={text}'"
         );
 
         *current_url = Some(text);

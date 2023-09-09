@@ -47,3 +47,7 @@ A fun collection of different tools which transform markdown to different markdo
 - [x] process faulty code anyway in playground inserter (Rustfmt)
 
 - [x] support `playground-indent`
+
+- [x] support channel for playground for example via `playground-channel:nightly`
+
+- [ ] formatter and normalizer type processors should probably have a -i "inline" flag
