@@ -53,3 +53,17 @@ A fun collection of different tools which transform markdown to different markdo
 - [ ] formatter and normalizer type processors should probably have a -i "inline" flag
 
 - [ ] marker syntax uses space, whereas annotations in md use `:`. This is not ideal.
+
+- [x] be more lenient when path prefix doesn't strip off current_dir.
+
+- [ ] Probably should remake (relative) path handling?
+
+- [ ] support paths on windows
+
+- [ ] coordinator binary which:
+  * generates justfile
+  * generates template linkify.toml
+  * generates .gitignore template
+  * Packages projects and presentations in a zip file
+
+- [x] support suppressing other markers in a snippet while including it via annotation in the source (`hide_other_markers`) -> useful for nested and overlapping markers

@@ -34,13 +34,25 @@ fn main() -> anyhow::Result<()> {
     let current_dir = std::env::current_dir().context("Failed to get current directory")?;
 
     for entry in Walk::new(directory).filter_map(Result::ok) {
+        // TODO make this function best-effort with warning output
         if entry.path().is_file() {
-            let content = read_to_string(entry.path())?;
+            let content = read_to_string(entry.path()).with_context(|| {
+                format!(
+                    "Failed to read source file content: {}",
+                    entry.path().display()
+                )
+            })?;
             let path = if args.relative {
-                entry
-                    .path()
-                    .strip_prefix(&current_dir)
-                    .context("Could not create relative path")?
+                match entry.path().strip_prefix(&current_dir) {
+                    Err(e) => {
+                        eprintln!(
+                            "Warning: Failed to strip path: {} with error {e}",
+                            entry.path().display()
+                        );
+                        entry.path()
+                    }
+                    Ok(stripped) => stripped,
+                }
             } else {
                 entry.path()
             };

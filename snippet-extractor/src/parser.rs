@@ -1,6 +1,7 @@
 use std::{collections::BTreeMap, path::Path};
 
 use itertools::Itertools;
+use relative_path::RelativePathBuf;
 use snippet_extractor::Snippet;
 
 use {once_cell::sync::Lazy, regex::Regex};
@@ -58,7 +59,8 @@ pub fn parse(text: &str, file: &Path) -> BTreeMap<String, Snippet> {
                     .join("\n");
                 let snippet = Snippet {
                     content,
-                    file: file.to_path_buf(),
+                    file: RelativePathBuf::from_path(file.to_path_buf())
+                        .expect("Failed to create portable path buffer"),
                     line: start.0,
                     col: 0,
                 };

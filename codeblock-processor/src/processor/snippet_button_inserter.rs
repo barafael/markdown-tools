@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use pulldown_cmark::CowStr;
 use snippet_extractor::Snippets;
 
@@ -28,16 +29,29 @@ impl ButtonInserter for SnippetButtonInserter {
             .filter(|s| s.starts_with("marker:"))
             .collect::<Vec<_>>()
             .pop();
+        let hide_other_markers = fence
+            .split_whitespace()
+            .any(|token| token == "hide_other_markers");
+
         if let Some(marker) = context {
             let marker = marker.split_once(':').unwrap().1;
             for value in self.snippets.snippets_for_id(marker) {
                 let snippet = &value.content;
-                let dedented = textwrap::dedent(snippet);
+                let snippet = if hide_other_markers {
+                    snippet
+                        .lines()
+                        .filter(|line| !line.trim().starts_with("// marker-"))
+                        .filter(|line| !line.trim().starts_with("# marker-"))
+                        .join("\n")
+                } else {
+                    snippet.clone()
+                };
+                let dedented = textwrap::dedent(&snippet);
                 *current_block = Some(dedented);
 
                 let url = format!(
                     "'vscode://file/'.concat(make_path('{}:{}:{}'))",
-                    value.file.display(),
+                    value.file,
                     value.line + 1,
                     value.col
                 );

@@ -22,7 +22,7 @@ impl Snippets {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Snippet {
     pub content: String,
-    pub file: PathBuf,
+    pub file: RelativePathBuf,
     pub line: usize,
     pub col: usize,
 }
