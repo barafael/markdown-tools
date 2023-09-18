@@ -6,9 +6,7 @@ use tempfile::TempDir;
 use crate::{link::Link, LinkTransformer};
 
 #[derive(Debug, Clone, Default)]
-pub struct DocsRustlang {
-    _client: reqwest::Client,
-}
+pub struct DocsRustlang;
 
 impl DocsRustlang {
     pub fn new() -> Self {
@@ -74,7 +72,7 @@ impl LinkTransformer for DocsRustlang {
             link.title = url.to_string().into();
         }
         if link.text.is_empty() {
-            link.text = vec![Event::Text(snippet.into())];
+            link.text = vec![Event::Code(snippet.into())];
         }
         Ok(())
     }

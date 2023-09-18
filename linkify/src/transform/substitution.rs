@@ -10,12 +10,18 @@ pub struct Substitution {
     tail: Regex,
     tag: String,
     replacement: String,
+
     #[serde(default = "one")]
     limit: usize,
+
     #[serde(default)]
     code: bool,
+
     #[serde(default)]
     tail_only: bool,
+
+    #[serde(default)]
+    replace_text: bool,
 }
 
 /// Workaround for <https://github.com/serde-rs/serde/issues/368>
@@ -33,6 +39,7 @@ impl Substitution {
             limit: 1,
             code: false,
             tail_only: false,
+            replace_text: false,
         }
     }
 }
@@ -48,7 +55,7 @@ impl LinkTransformer for Substitution {
     }
 
     fn strip_tag(&self) -> bool {
-        false
+        self.tail_only
     }
 
     /// Perform the replacement.
@@ -69,9 +76,21 @@ impl LinkTransformer for Substitution {
         } else {
             snippet.to_string()
         };
+
+        let text = if self.strip_tag() && text.starts_with(&self.tag()) {
+            text.replace(&self.tag(), "")
+        } else {
+            text
+        };
+        let event = if self.code {
+            Event::Code(text.into())
+        } else {
+            Event::Text(text.into())
+        };
+
         link.destination = snippet.to_string().into();
-        if link.text.is_empty() {
-            link.text = vec![Event::Text(text.into())];
+        if link.text.is_empty() || self.replace_text {
+            link.text = vec![event];
         }
         if link.title.is_empty() {
             link.title = link.destination.clone();
@@ -94,10 +113,32 @@ mod test {
             limit: 0,
             code: true,
             tail_only: false,
+            replace_text: false,
         };
         let link = &mut Link {
             link_type: LinkType::Reference,
             destination: "GTPR-12355".into(),
+            title: "".into(),
+            text: vec![],
+        };
+        sub.apply(link).unwrap();
+        dbg!(link);
+    }
+
+    #[test]
+    fn struct_keyword_replacement() {
+        let sub = Substitution {
+            tail: Regex::new(r"(?<word>\w+)").unwrap(),
+            tag: "keyword".into(),
+            replacement: "https://doc.rust-lang.org/std/keyword.$word.html".to_string(),
+            limit: 1,
+            code: true,
+            tail_only: true,
+            replace_text: false,
+        };
+        let link = &mut Link {
+            link_type: LinkType::Autolink,
+            destination: "keyword:struct".into(),
             title: "".into(),
             text: vec![],
         };

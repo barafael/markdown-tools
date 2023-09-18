@@ -50,14 +50,16 @@ pub fn process_broken_links<'a>(
         let Some(Event::Text(first)) = link.text.get_mut(0) else {
             return aggregation;
         };
+        // turn broken links into full links
         for replacer in &replacers {
-            if !replacer.strip_tag() {
-                continue;
-            }
-            if first.starts_with(&replacer.tag()) {
-                let new_text = first.replace(&replacer.tag(), "");
-                *first = new_text.into();
-                return Aggregation::Link(link.clone());
+            // remove initial replacer tag (such as `rust:`)
+            // TODO why `continue`?
+            if replacer.strip_tag() {
+                if first.starts_with(&replacer.tag()) {
+                    let new_text = first.replace(&replacer.tag(), "");
+                    *first = new_text.into();
+                    return Aggregation::Link(link.clone());
+                }
             }
         }
         aggregation
@@ -75,11 +77,10 @@ pub fn process_links<'a>(
                 return anyhow::Ok(aggregation);
             };
             for replacement in replacers {
-                if !replacement.pattern().is_match(&link.destination) {
-                    continue;
+                if replacement.pattern().is_match(&link.destination) {
+                    replacement.apply(&mut link)?;
+                    break;
                 }
-                replacement.apply(&mut link)?;
-                break;
             }
             Ok(Aggregation::Link(link))
         })

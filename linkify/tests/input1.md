@@ -1,5 +1,9 @@
 # Test File
 
+[keyword:struct]
+
+[`struct`](keyword:struct)
+
 [some text, random](PS-129 "some title")
 
 [`test`](PS-129)
@@ -25,3 +29,5 @@ here is a text with several text sections: [Provided Methods von String Slices (
 ---
 
 [the `&str` type is `cool`](rust:str "yeah")
+
+[keyword:let]

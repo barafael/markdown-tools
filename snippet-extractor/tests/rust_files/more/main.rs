@@ -22,7 +22,6 @@ fn main() -> anyhow::Result<()> {
 
     let mut i = parser.map(|event| match event {
         Event::Start(Tag::CodeBlock(ref kind)) => {
-            dbg!(kind);
             in_code_block = true;
             event
         }
@@ -39,7 +38,6 @@ fn main() -> anyhow::Result<()> {
 
     let mut buf = String::with_capacity(input.len() + 1000);
     let state = cmark(&mut i, &mut buf)?;
-    dbg!(state);
 
     let mut stdout = std::io::stdout();
 

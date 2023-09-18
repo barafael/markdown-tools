@@ -67,3 +67,7 @@ A fun collection of different tools which transform markdown to different markdo
   * Packages projects and presentations in a zip file
 
 - [x] support suppressing other markers in a snippet while including it via annotation in the source (`hide_other_markers`) -> useful for nested and overlapping markers
+
+- [ ] in rhea.css, footers with links that are `code` do not look good: `<!-- _footer: 'Inspired by [`serde_json::Value`](https://docs.rs/serde_json/1.0.106/serde_json/enum.Value.html)'-->`
+
+- [ ] // marker-pause:x,y,z comments which skip a section, delimited by marker-resume:x,y,z. Probably needs grammar or something to be really clean...
