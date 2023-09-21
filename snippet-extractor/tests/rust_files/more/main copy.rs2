@@ -44,9 +44,9 @@ fn main() -> anyhow::Result<()> {
     stdout.write_all(buf.as_bytes())?;
     Ok(())
 }
-// marker-start test1
+// marker-start:test1
 marker marker marker
-// marker-end test1
+// marker-end:test1
 
 /*
 fn format_rust_code_block_crate(code: &str) -> String {

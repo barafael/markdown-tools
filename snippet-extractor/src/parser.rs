@@ -7,10 +7,10 @@ use snippet_extractor::Snippet;
 use {once_cell::sync::Lazy, regex::Regex};
 
 static MARKER_START: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"[//|#] marker-start (\w+)").expect("invalid regex"));
+    Lazy::new(|| Regex::new(r"[//|#] marker-start:(\w+)").expect("invalid regex"));
 
 static MARKER_END: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"[//|#] marker-end (\w+)").expect("invalid regex"));
+    Lazy::new(|| Regex::new(r"[//|#] marker-end:(\w+)").expect("invalid regex"));
 
 pub fn parse(text: &str, file: &Path) -> BTreeMap<String, Snippet> {
     let mut snippets = BTreeMap::default();
@@ -85,17 +85,17 @@ mod test {
             .get("begin")
             .unwrap()
             .content
-            .contains("// marker-start alsobegin"));
+            .contains("// marker-start:alsobegin"));
         assert!(snippets
             .get("begin")
             .unwrap()
             .content
-            .contains("// marker-end alsobegin"));
+            .contains("// marker-end:alsobegin"));
         assert!(!snippets
             .get("begin")
             .unwrap()
             .content
-            .contains("// marker-start begin"));
+            .contains("// marker-start:begin"));
     }
 
     #[test]
@@ -106,11 +106,11 @@ mod test {
             .get("begin")
             .unwrap()
             .content
-            .contains("# marker-start alsobegin"));
+            .contains("# marker-start:alsobegin"));
         assert!(snippets
             .get("alsobegin")
             .unwrap()
             .content
-            .contains("# marker-end begin"));
+            .contains("# marker-end:begin"));
     }
 }

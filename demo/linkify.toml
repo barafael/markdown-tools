@@ -1,17 +1,17 @@
-# marker-start linkifyjira
+# marker-start:linkifyjira
 [[regex]]
 tag = 'PS-'
 tail = '\d+'
 replacement = "https://internal.jira.com/$text"
 limit = 1
 strip_tag = false
-# marker-end linkifyjira
+# marker-end:linkifyjira
 
-# marker-start linkifykeyword
+# marker-start:linkifykeyword
 [[regex]]
 tag = 'keyword:'
 tail = '(?<word>\w+)'
 replacement = 'https://doc.rust-lang.org/std/keyword.$word.html'
 limit = 1
 code = true
-# marker-end linkifykeyword
+# marker-end:linkifykeyword

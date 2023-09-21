@@ -52,7 +52,7 @@ A fun collection of different tools which transform markdown to different markdo
 
 - [ ] formatter and normalizer type processors should probably have a -i "inline" flag
 
-- [ ] marker syntax uses space, whereas annotations in md use `:`. This is not ideal.
+- [x] marker syntax uses space, whereas annotations in md use `:`. This is not ideal.
 
 - [x] be more lenient when path prefix doesn't strip off current_dir.
 
@@ -71,3 +71,5 @@ A fun collection of different tools which transform markdown to different markdo
 - [ ] in rhea.css, footers with links that are `code` do not look good: `<!-- _footer: 'Inspired by [`serde_json::Value`](https://docs.rs/serde_json/1.0.106/serde_json/enum.Value.html)'-->`
 
 - [ ] // marker-pause:x,y,z comments which skip a section, delimited by marker-resume:x,y,z. Probably needs grammar or something to be really clean...
+
+- [ ] support links in footnotes (at least [`thing`](rust:std::thing) does not work)

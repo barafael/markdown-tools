@@ -14,10 +14,10 @@ mod test {
     fn parses_simple_snippets() {
         let text = r#"
    Stop it. You breathe in, you breathe out. Eat, shit, sleep. You take whatever they give you, and you give nothing in return.
-// marker-start peaches
+// marker-start:peaches
 let a = 4;
 let a = 5;
-// marker-end peaches
+// marker-end:peaches
 "#;
         let pair = SnippetParser::parse(super::Rule::file, text)
             .unwrap()
