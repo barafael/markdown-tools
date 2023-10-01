@@ -1,5 +1,7 @@
 # Test File
 
+Rust [Matrix](https://matrix.to/#/#rust:matrix.org)
+
 [some text, random](https://internal.jira.com/PS-129 "some title")
 
 [`test`](https://internal.jira.com/PS-129 "https://internal.jira.com/PS-129")

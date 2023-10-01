@@ -55,7 +55,9 @@ impl LinkTransformer for Docsrs {
         if link.title.is_empty() {
             link.title = url.into();
         }
-        link.text = vec![Event::Text(name.into())];
+        if link.text.is_empty() {
+            link.text.push(Event::Code(name.into()));
+        }
         Ok(())
     }
 }

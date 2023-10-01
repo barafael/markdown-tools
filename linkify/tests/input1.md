@@ -1,5 +1,7 @@
 # Test File
 
+Rust [Matrix](https://matrix.to/#/#rust:matrix.org)
+
 [keyword:struct]
 
 [`struct`](keyword:struct)

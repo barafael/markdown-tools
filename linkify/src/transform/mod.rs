@@ -21,7 +21,7 @@ pub trait LinkTransformer: Debug + dyn_clone::DynClone {
 
     /// Regex which will be applied to extract the salient part of the link destination.
     fn pattern(&self) -> Regex {
-        Regex::new(format!("{}(?<i>.+)", self.tag()).as_str()).expect("Invalid regex")
+        Regex::new(format!("^{}(?<i>.+)", self.tag()).as_str()).expect("Invalid regex")
     }
 
     fn strip_tag(&self) -> bool {

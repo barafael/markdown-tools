@@ -4,7 +4,7 @@ use processor::playground_button_inserter::PlaygroundButtonInserter;
 use processor::snippet_button_inserter::SnippetButtonInserter;
 use processor::ButtonInserter;
 use pulldown_cmark::{CodeBlockKind, CowStr, Event, Parser, Tag};
-use pulldown_cmark_to_cmark::cmark;
+use pulldown_cmark_to_cmark::{cmark, cmark_with_options};
 use snippet_extractor::Snippets;
 use std::path::PathBuf;
 use std::{fs, io::Write};
@@ -110,7 +110,9 @@ fn main() -> anyhow::Result<()> {
 
     let mut output = String::with_capacity(input.len() + 1000);
 
-    let _state = cmark(&mut document.into_iter(), &mut output)?;
+    let mut options = pulldown_cmark_to_cmark::Options::default();
+    options.list_token = '-';
+    let _state = cmark_with_options(&mut document.into_iter(), &mut output, options)?;
 
     if let Some(path) = args.output {
         std::fs::write(path, output)?;

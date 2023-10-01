@@ -6,7 +6,7 @@ use markdown_linkify::{
     broken_link_callback_with_replacers, process_broken_links, process_links, LinkTransformer,
     Transformers,
 };
-use pulldown_cmark_to_cmark::cmark;
+use pulldown_cmark_to_cmark::cmark_with_options;
 use std::path::PathBuf;
 
 use std::{fs, io::Write};
@@ -73,8 +73,11 @@ fn main() -> anyhow::Result<()> {
     let iterator = process_broken_links(&input, replacers.clone(), cb);
     let iterator = process_links(iterator, &replacers);
 
+    let mut options = pulldown_cmark_to_cmark::Options::default();
+    options.list_token = '-';
+
     let mut buf = String::with_capacity(input.len());
-    let _state = cmark(iterator, &mut buf)?;
+    let _state = cmark_with_options(iterator, &mut buf, options)?;
 
     if let Some(path) = &args.output {
         std::fs::write(path, buf)

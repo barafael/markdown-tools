@@ -68,8 +68,22 @@ A fun collection of different tools which transform markdown to different markdo
 
 - [x] support suppressing other markers in a snippet while including it via annotation in the source (`hide_other_markers`) -> useful for nested and overlapping markers
 
-- [ ] in rhea.css, footers with links that are `code` do not look good: `<!-- _footer: 'Inspired by [`serde_json::Value`](https://docs.rs/serde_json/1.0.106/serde_json/enum.Value.html)'-->`
+- [x] in rhea.css, footers with links that are `code` do not look good: `<!-- _footer: 'Inspired by [`serde_json::Value`](https://docs.rs/serde_json/1.0.106/serde_json/enum.Value.html)'-->`
 
 - [ ] // marker-pause:x,y,z comments which skip a section, delimited by marker-resume:x,y,z. Probably needs grammar or something to be really clean...
 
 - [ ] support links in footnotes (at least [`thing`](rust:std::thing) does not work)
+
+- [ ] link checker for image paths
+
+- [ ] collect snippets from https://doc.rust-lang.org/
+
+- [ ] collect snippets from github
+
+- [ ] like [keyword:let] but for other items?
+
+- [ ] collect all metadata during processing into a cache, for offline mode and faster conversion?
+
+- [x] fix bug: links that contain a `tag:` but don't start with it are misrecognized
+
+- [x] normalize list items to `-`
