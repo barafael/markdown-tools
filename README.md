@@ -87,3 +87,9 @@ A fun collection of different tools which transform markdown to different markdo
 - [x] fix bug: links that contain a `tag:` but don't start with it are misrecognized
 
 - [x] normalize list items to `-`
+
+- [ ] allow applying patches or sth. on subdirectories. Reason: may want to include git submodules and add markers to them without creating/maintaining a branch upstream?
+
+- [ ] conceptional problem with `playground-before`: comments go to the end of the line, but there is only one line. Also the whole idea of in-slide hidden code is a little misled
+
+- [ ] if the code block fence contains somewhere the string ` tag:`, it is interpreted as another start tag. Hell nah, that's a bug. Work around it by removing the space before the tag, something like `,tag:`. But really, this needs fixing up, conceptually.
