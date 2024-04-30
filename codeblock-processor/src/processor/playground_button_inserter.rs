@@ -91,15 +91,14 @@ impl ButtonInserter for PlaygroundButtonInserter {
         let before = template.pre;
         let after = template.post;
         let code = if fence.split_whitespace().contains(&"playground-indent") {
-            textwrap::indent(&code, "    ")
+            textwrap::indent(code, "    ")
         } else {
             code.to_string()
         };
 
         let channel = fence
             .split_whitespace()
-            .filter(|s| s.starts_with("playground-channel:"))
-            .next()
+            .find(|s| s.starts_with("playground-channel:"))
             .unwrap_or("stable");
         let channel = channel.replace("playground-channel:", "");
 

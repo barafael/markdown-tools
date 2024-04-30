@@ -120,6 +120,7 @@ mod test {
             destination: "GTPR-12355".into(),
             title: "".into(),
             text: vec![],
+            id: "".into(),
         };
         sub.apply(link).unwrap();
         dbg!(link);
@@ -141,6 +142,7 @@ mod test {
             destination: "keyword:struct".into(),
             title: "".into(),
             text: vec![],
+            id: "".into(),
         };
         sub.apply(link).unwrap();
         dbg!(link);

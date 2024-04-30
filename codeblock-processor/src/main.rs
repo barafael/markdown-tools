@@ -3,8 +3,8 @@ use clap::Parser as ClapParser;
 use processor::playground_button_inserter::PlaygroundButtonInserter;
 use processor::snippet_button_inserter::SnippetButtonInserter;
 use processor::ButtonInserter;
-use pulldown_cmark::{CodeBlockKind, CowStr, Event, Parser, Tag};
-use pulldown_cmark_to_cmark::{cmark, cmark_with_options};
+use pulldown_cmark::{CodeBlockKind, CowStr, Event, Parser, Tag, TagEnd};
+use pulldown_cmark_to_cmark::cmark_with_options;
 use snippet_extractor::Snippets;
 use std::path::PathBuf;
 use std::{fs, io::Write};
@@ -87,12 +87,12 @@ fn main() -> anyhow::Result<()> {
                 );
                 document.push(event);
             }
-            Event::End(Tag::CodeBlock(_)) => {
+            Event::End(TagEnd::CodeBlock) => {
                 document.push(event);
                 if args.button {
                     if let Some(url) = current_url.take() {
                         let btn_text = current_btn_text.take().unwrap_or_default();
-                        let button = make_button(url, btn_text);
+                        let button = make_button(url, &btn_text);
                         document.extend(button.into_iter());
                     }
                     document.push(Event::Html("</div>\n\n".into()));
@@ -110,8 +110,10 @@ fn main() -> anyhow::Result<()> {
 
     let mut output = String::with_capacity(input.len() + 1000);
 
-    let mut options = pulldown_cmark_to_cmark::Options::default();
-    options.list_token = '-';
+    let options = pulldown_cmark_to_cmark::Options {
+        list_token: '-',
+        ..Default::default()
+    };
     let _state = cmark_with_options(&mut document.into_iter(), &mut output, options)?;
 
     if let Some(path) = args.output {
@@ -124,7 +126,7 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn make_button<'a>(url: String, btn_text: String) -> Vec<Event<'a>> {
+fn make_button<'a>(url: String, btn_text: &str) -> Vec<Event<'a>> {
     let mut button = Vec::new();
     button.push(Event::Html("<p style=\"position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0\">\n".into()));
     button.push(Event::Html("<button\n    onclick=\"window.open(".into()));
@@ -134,7 +136,7 @@ fn make_button<'a>(url: String, btn_text: String) -> Vec<Event<'a>> {
     button.push(Event::Html("    height: fit-content;\n".into()));
     button.push(Event::Html("    margin: 0;\n".into()));
     button.push(Event::Html("    font-weight: bold;\"\n".into()));
-    button.push(Event::Html(format!(">{}\n", btn_text).into()));
+    button.push(Event::Html(format!(">{btn_text}\n").into()));
     button.push(Event::Html("</button>\n".into()));
     button.push(Event::Html("</p>\n".into()));
     button
@@ -149,10 +151,7 @@ mod test {
     #[test]
     fn makes_button() {
         let mut output = String::new();
-        let button = make_button(
-            "'https://www.example.com'".to_string(),
-            "Example.com!".into(),
-        );
+        let button = make_button("'https://www.example.com'".to_string(), "Example.com!");
         let _state = cmark(&mut button.into_iter(), &mut output).unwrap();
 
         let expected = r#"<p style="position: absolute; right: 10px; top: 10px; padding: 0; margin: 0; line-height: 0">

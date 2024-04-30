@@ -23,6 +23,7 @@ pub fn broken_link_callback_with_replacers<'a>(
                     destination: link.reference,
                     title: "".into(),
                     text: vec![],
+                    id: "".into(),
                 };
                 replacer.apply(&mut link).unwrap();
                 return Some((link.destination, link.title));
@@ -53,13 +54,10 @@ pub fn process_broken_links<'a>(
         // turn broken links into full links
         for replacer in &replacers {
             // remove initial replacer tag (such as `rust:`)
-            // TODO why `continue`?
-            if replacer.strip_tag() {
-                if first.starts_with(&replacer.tag()) {
-                    let new_text = first.replace(&replacer.tag(), "");
-                    *first = new_text.into();
-                    return Aggregation::Link(link.clone());
-                }
+            if replacer.strip_tag() && first.starts_with(&replacer.tag()) {
+                let new_text = first.replace(&replacer.tag(), "");
+                *first = new_text.into();
+                return Aggregation::Link(link.clone());
             }
         }
         aggregation

@@ -10,7 +10,7 @@ pub struct DocsRustlang;
 
 impl DocsRustlang {
     pub fn new() -> Self {
-        Self::default()
+        Self
     }
 }
 

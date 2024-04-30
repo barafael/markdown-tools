@@ -59,7 +59,7 @@ pub fn parse(text: &str, file: &Path) -> BTreeMap<String, Snippet> {
                     .join("\n");
                 let snippet = Snippet {
                     content,
-                    file: RelativePathBuf::from_path(file.to_path_buf())
+                    file: RelativePathBuf::from_path(file)
                         .expect("Failed to create portable path buffer"),
                     line: start.0,
                     col: 0,

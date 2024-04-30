@@ -9,9 +9,9 @@ repository = "https://github.com/barafael/markdown-tools"
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.2", features = ["derive"] }
-itertools = "0.11.0"
-pulldown-cmark = "0.9.3"
-pulldown-cmark-to-cmark = "11.0.0"
+itertools = "0.12.1"
+pulldown-cmark = "0.10.3"
+pulldown-cmark-to-cmark = "13.0.0"
 serde = "1.0.188"
 serde_json = "1.0.105"
 snippet-extractor = { path = "../snippet-extractor" }

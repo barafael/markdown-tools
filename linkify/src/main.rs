@@ -45,7 +45,7 @@ fn main() -> anyhow::Result<()> {
 
     let regex_replacers = if let Some(config) = args.config {
         toml::from_str::<Transformers>(
-            &fs::read_to_string(&config).context("Failed to read transformer config file")?,
+            &fs::read_to_string(config).context("Failed to read transformer config file")?,
         )
         .context("Failed to deserialize toml config file")?
     } else {
@@ -73,8 +73,10 @@ fn main() -> anyhow::Result<()> {
     let iterator = process_broken_links(&input, replacers.clone(), cb);
     let iterator = process_links(iterator, &replacers);
 
-    let mut options = pulldown_cmark_to_cmark::Options::default();
-    options.list_token = '-';
+    let options = pulldown_cmark_to_cmark::Options {
+        list_token: '-',
+        ..Default::default()
+    };
 
     let mut buf = String::with_capacity(input.len());
     let _state = cmark_with_options(iterator, &mut buf, options)?;

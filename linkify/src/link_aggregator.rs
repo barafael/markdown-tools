@@ -1,13 +1,13 @@
 use crate::aggregation::Aggregation;
 use crate::link::Link;
 
-use pulldown_cmark::{CowStr, Event, LinkType, Tag};
+use pulldown_cmark::{CowStr, Event, LinkType, Tag, TagEnd};
 
 #[derive(Debug, Default)]
 pub enum Aggregator<'a> {
     #[default]
     Empty,
-    Start(LinkType, CowStr<'a>, CowStr<'a>),
+    Start(LinkType, CowStr<'a>, CowStr<'a>, CowStr<'a>),
     Text(Link<'a>),
 }
 
@@ -42,12 +42,13 @@ where
             let Some(next) = next else {
                 return match std::mem::replace(&mut self.state, Aggregator::Empty) {
                     Aggregator::Empty => None,
-                    Aggregator::Start(link_type, destination, title) => {
+                    Aggregator::Start(link_type, destination, title, id) => {
                         Some(Aggregation::Link(Link {
                             link_type,
                             destination,
                             title,
                             text: vec![],
+                            id,
                         }))
                     }
                     Aggregator::Text(link) => Some(Aggregation::Link(link)),
@@ -55,29 +56,43 @@ where
             };
             let state = std::mem::replace(&mut self.state, Aggregator::Empty);
             match (state, next) {
-                (Aggregator::Empty, Event::Start(Tag::Link(link_type, destination, title))) => {
-                    self.state = Aggregator::Start(link_type, destination, title);
+                (
+                    Aggregator::Empty,
+                    Event::Start(Tag::Link {
+                        link_type,
+                        dest_url,
+                        title,
+                        id,
+                    }),
+                ) => {
+                    self.state = Aggregator::Start(link_type, dest_url, title, id);
                     continue;
                 }
                 (Aggregator::Empty, e) => break Some(Aggregation::Event(e)),
-                (Aggregator::Start(link_type, destination, title), e @ Event::Start(..)) => {
-                    let start = Event::Start(Tag::Link(link_type, destination, title));
+                (Aggregator::Start(link_type, dest_url, title, id), e @ Event::Start(..)) => {
+                    let start = Event::Start(Tag::Link {
+                        link_type,
+                        dest_url,
+                        title,
+                        id,
+                    });
                     let agg = Aggregation::Bag(vec![start, e]);
                     self.state = Aggregator::Empty;
                     break Some(agg);
                 }
-                (Aggregator::Start(link_type, destination, title), Event::End(Tag::Link(..))) => {
+                (Aggregator::Start(link_type, dest_url, title, id), Event::End(TagEnd::Link)) => {
                     let result = Link {
                         link_type,
-                        destination,
+                        destination: dest_url,
                         title,
                         text: vec![],
+                        id,
                     };
                     self.state = Aggregator::Empty;
                     break Some(Aggregation::Link(result));
                 }
                 (
-                    Aggregator::Start(link_type, destination, title),
+                    Aggregator::Start(link_type, destination, title, id),
                     e @ (Event::Text(..) | Event::Code(..)),
                 ) => {
                     let link = Link {
@@ -85,6 +100,7 @@ where
                         destination,
                         title,
                         text: vec![e],
+                        id,
                     };
                     self.state = Aggregator::Text(link);
                     continue;
@@ -94,7 +110,7 @@ where
                     self.state = Aggregator::Text(link);
                     continue;
                 }
-                (Aggregator::Text(link), Event::End(Tag::Link(..))) => {
+                (Aggregator::Text(link), Event::End(TagEnd::Link)) => {
                     self.state = Aggregator::Empty;
                     break Some(Aggregation::Link(link));
                 }
@@ -126,8 +142,7 @@ where
 mod test {
     use super::*;
 
-    use crate::aggregation::Aggregation;
-    use pulldown_cmark::{BrokenLink, CowStr, Event, LinkType, Options, Parser};
+    use pulldown_cmark::{BrokenLink, Options, Parser};
     use pulldown_cmark_to_cmark::cmark;
 
     #[test]
@@ -194,7 +209,7 @@ mod test {
         let mut parser2 = Parser::new(md);
 
         for agg in parser.aggregate_links() {
-            for elem in agg.into_iter() {
+            for elem in agg {
                 assert_eq!(Some(elem), parser2.next());
             }
         }
