@@ -95,6 +95,7 @@ fn main() -> anyhow::Result<()> {
                         let button = make_button(url, &btn_text);
                         document.extend(button.into_iter());
                     }
+                    document.push(Event::Text("\n".into()));
                     document.push(Event::Html("</div>\n\n".into()));
                 }
             }
