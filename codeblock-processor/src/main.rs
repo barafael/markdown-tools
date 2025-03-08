@@ -89,6 +89,7 @@ fn main() -> anyhow::Result<()> {
             }
             Event::End(TagEnd::CodeBlock) => {
                 document.push(event);
+                document.push(Event::Text("\n".into()));
                 if args.button {
                     if let Some(url) = current_url.take() {
                         let btn_text = current_btn_text.take().unwrap_or_default();
@@ -103,6 +104,7 @@ fn main() -> anyhow::Result<()> {
         };
     }
 
+    document.push(Event::Text("\n".into()));
     document.push(Event::Html(include_str!("make_path.html").into()));
     document.push(Event::Text("\n".into()));
 
